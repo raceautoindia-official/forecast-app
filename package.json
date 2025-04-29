@@ -9,13 +9,21 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "next": "15.2.4"
+    "@ant-design/icons": "^6.0.0",
+    "antd": "^5.24.6",
+    "dagre": "^0.8.5",
+    "formidable": "^3.5.2",
+    "mysql2": "^3.14.0",
+    "next": "14.2.12",
+    "next-connect": "^1.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "reactflow": "^11.11.4",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3",
     "eslint": "^9",
-    "eslint-config-next": "15.2.4",
-    "@eslint/eslintrc": "^3"
+    "eslint-config-next": "15.2.4"
   }
 }

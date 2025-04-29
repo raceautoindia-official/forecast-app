@@ -1,0 +1,120 @@
+// File: app/components/ManageQuestions.js
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Table, Form, Input, InputNumber, Select, Button, Popconfirm, message } from 'antd';
+
+export default function ManageQuestions() {
+  const [questions, setQuestions] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [form] = Form.useForm();
+
+  const fetchQuestions = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/questions');
+      const data = await res.json();
+      setQuestions(data);
+    } catch {
+      message.error('Could not load questions');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchQuestions() }, []);
+
+  const onFinish = async (values) => {
+    try {
+      await fetch('/api/questions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(values)
+      });
+      message.success('Question added');
+      form.resetFields();
+      fetchQuestions();
+    } catch {
+      message.error('Add failed');
+    }
+  };
+
+  const deleteQuestion = async (id) => {
+    try {
+      await fetch('/api/questions', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
+      message.success('Deleted');
+      fetchQuestions();
+    } catch {
+      message.error('Delete failed');
+    }
+  };
+
+  const columns = [
+    { title: 'ID', dataIndex: 'id', width: 60 },
+    { title: 'Question', dataIndex: 'text', ellipsis: true },
+    { title: 'Weight', dataIndex: 'weight' },
+    { title: 'Type', dataIndex: 'type', render: t => t.charAt(0).toUpperCase()+t.slice(1) },
+    { title: 'Created At', dataIndex: 'created_at',
+      render: dt => new Date(dt).toLocaleString()
+    },
+    {
+      title: 'Action',
+      render: (_, record) => (
+        <Popconfirm
+          title="Delete this question?"
+          onConfirm={() => deleteQuestion(record.id)}
+        >
+          <a>Delete</a>
+        </Popconfirm>
+      )
+    }
+  ];
+
+  return (
+    <>
+      <Form
+        form={form}
+        layout="inline"
+        onFinish={onFinish}
+        style={{ marginBottom: 16 }}
+      >
+        <Form.Item
+          name="text"
+          rules={[{ required: true, message: 'Question text required' }]}
+        >
+          <Input placeholder="Question" style={{ width: 300 }} />
+        </Form.Item>
+        <Form.Item
+          name="weight"
+          rules={[{ required: true, message: 'Weight required' }]}
+        >
+          <InputNumber placeholder="Weight" min={0} max={1} step={0.01} />
+        </Form.Item>
+        <Form.Item
+          name="type"
+          rules={[{ required: true, message: 'Select type' }]}
+        >
+          <Select placeholder="Type" style={{ width: 140 }}>
+            <Select.Option value="positive">Positive</Select.Option>
+            <Select.Option value="negative">Negative</Select.Option>
+          </Select>
+        </Form.Item>
+        <Form.Item>
+          <Button type="primary" htmlType="submit">Add Question</Button>
+        </Form.Item>
+      </Form>
+
+      <Table
+        rowKey="id"
+        loading={loading}
+        dataSource={questions}
+        columns={columns}
+        pagination={{ pageSize: 10 }}
+      />
+    </>
+  );
+}
