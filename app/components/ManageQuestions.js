@@ -2,12 +2,29 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Table, Form, Input, InputNumber, Select, Button, Popconfirm, message } from 'antd';
+import {
+  Table,
+  Form,
+  Input,
+  InputNumber,
+  Select,
+  Button,
+  Popconfirm,
+  message,
+  Row,
+  Col,
+  Typography
+} from 'antd';
+
+const { Text } = Typography;
 
 export default function ManageQuestions() {
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
+
+  // filter state: 'all' | 'positive' | 'negative'
+  const [filterType, setFilterType] = useState('all');
 
   const fetchQuestions = async () => {
     setLoading(true);
@@ -22,7 +39,9 @@ export default function ManageQuestions() {
     }
   };
 
-  useEffect(() => { fetchQuestions() }, []);
+  useEffect(() => {
+    fetchQuestions();
+  }, []);
 
   const onFinish = async (values) => {
     try {
@@ -53,12 +72,33 @@ export default function ManageQuestions() {
     }
   };
 
+  // coerce weight to Number so reduce stays numeric
+  const totalPositive = questions
+    .filter(q => q.type === 'positive')
+    .reduce((sum, q) => sum + Number(q.weight || 0), 0);
+
+  const totalNegative = questions
+    .filter(q => q.type === 'negative')
+    .reduce((sum, q) => sum + Number(q.weight || 0), 0);
+
+  // filter what's shown
+  const displayed = questions.filter(q => {
+    if (filterType === 'all') return true;
+    return q.type === filterType;
+  });
+
   const columns = [
     { title: 'ID', dataIndex: 'id', width: 60 },
     { title: 'Question', dataIndex: 'text', ellipsis: true },
     { title: 'Weight', dataIndex: 'weight' },
-    { title: 'Type', dataIndex: 'type', render: t => t.charAt(0).toUpperCase()+t.slice(1) },
-    { title: 'Created At', dataIndex: 'created_at',
+    {
+      title: 'Type',
+      dataIndex: 'type',
+      render: t => t.charAt(0).toUpperCase() + t.slice(1)
+    },
+    {
+      title: 'Created At',
+      dataIndex: 'created_at',
       render: dt => new Date(dt).toLocaleString()
     },
     {
@@ -104,14 +144,43 @@ export default function ManageQuestions() {
           </Select>
         </Form.Item>
         <Form.Item>
-          <Button type="primary" htmlType="submit">Add Question</Button>
+          <Button type="primary" htmlType="submit">
+            Add Question
+          </Button>
         </Form.Item>
       </Form>
+
+      <Row gutter={16} align="middle" style={{ marginBottom: 16 }}>
+        <Col>
+          <Text strong>Show:</Text>{' '}
+          <Select
+            value={filterType}
+            onChange={setFilterType}
+            style={{ width: 140 }}
+          >
+            <Select.Option value="all">All</Select.Option>
+            <Select.Option value="positive">Positive</Select.Option>
+            <Select.Option value="negative">Negative</Select.Option>
+          </Select>
+        </Col>
+        <Col>
+          <Text>
+            Total Positive Weight:{' '}
+            <Text strong>{totalPositive.toFixed(2)}</Text>
+          </Text>
+        </Col>
+        <Col>
+          <Text>
+            Total Negative Weight:{' '}
+            <Text strong>{totalNegative.toFixed(2)}</Text>
+          </Text>
+        </Col>
+      </Row>
 
       <Table
         rowKey="id"
         loading={loading}
-        dataSource={questions}
+        dataSource={displayed}
         columns={columns}
         pagination={{ pageSize: 10 }}
       />

@@ -7,7 +7,8 @@ export async function GET(req) {
         id, 
         stream, 
         format_chart_id AS formatChartId,
-        created_at  AS createdAt
+        created_at  AS createdAt,
+        data
       FROM volume_data
       ORDER BY created_at DESC
     `);

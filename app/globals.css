@@ -1,0 +1,248 @@
+body {
+    padding: 0;
+    margin: 0;
+    overflow-x: hidden;
+    /* background-color: #e0dada !important; */
+  }
+  @media (max-width: 767px) {
+    .desktop-view {
+      display: none !important;
+    }
+    .tab-view {
+      display: none !important;
+    }
+  }
+  @media (min-width: 768px) and (max-width: 1280px) {
+    .desktop-view {
+      display: none !important;
+    }
+    .mobile-view {
+      display: none !important;
+    }
+    .tab-view {
+      display: block !important; 
+    }
+  }
+  @media (min-width: 1281px) {
+    .mobile-view {
+      display: none !important;
+    }
+    .tab-view {
+      display: none !important;
+    }
+  }
+  @media (max-width: 767px) {
+    .desktop-view {
+      display: none !important;
+    }
+    .tab-view {
+      display: none !important;
+    }
+  }
+  
+  
+  @media (max-width: 767px) {
+    h1.text-center {
+      font-size: 20px; 
+    }
+  
+    h4.text-center {
+      font-size: 16px; 
+    }
+  }
+  
+  @media (min-width: 768px) {
+    h1.text-center {
+      font-size: 32px; 
+    }
+  
+    h4.text-center {
+      font-size: 24px;
+    }
+  }
+  
+  
+  @media (max-width: 768px) {
+    .to-forecast {
+      top: 30% !important; 
+    }
+  }.country-item {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: filter 0.3s ease-in-out;
+    cursor:"pointer"; 
+  }
+  
+  .country-name {
+    flex-grow: 1;
+    transition: filter 0.3s ease-in-out;
+  }
+  
+  .lock-overlay {
+    position: absolute;
+    right:70px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    top:10;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  
+    opacity: 0; 
+    transition: opacity 0.3s ease-in-out;
+  }
+  
+  
+  .show-lock .country-name {
+    filter: blur(3px);
+  }
+  
+  .show-lock .lock-overlay {
+    opacity: 1;
+  }
+  @media (max-width: 767px) {
+    .global-desktop{
+      display: none !important;
+    }
+    .global-tab {
+      display: none !important;
+    }
+  }
+  
+  @media (min-width: 768px) and (max-width: 1024px) {
+    .global-desktop {
+      display: none !important;
+    }
+    .global-mobile {
+      display: none !important;
+    }
+  }
+  
+  @media (min-width: 1025px) {
+    .global-mobile {
+      display: none !important;
+    }
+    .global-tab {
+      display: none !important;
+    }
+  }
+  .custom-border{
+    border: 1px solid black;
+    padding: 15px;
+    border-radius: 8px;
+  }
+  .year-container {
+    font-size: 1.20rem;
+    display: flex;
+    gap: 1rem;
+  }
+  @media (min-width: 768px) and (max-width: 1367)  {
+    .year-container {
+      margin-right: 35px !important;
+      /* margin-right: 0 !important; */
+    }
+  }
+  
+  @media (max-width: 767px) {
+    .desktop {
+      display: none !important;
+    }
+    .tab {
+      display: none !important;
+    }
+  }
+  
+  @media (min-width: 768px) and (max-width: 1024px) {
+    .desktop {
+      display: none !important;
+    }
+    .mobile {
+      display: none !important;
+    }
+  }
+  
+  @media (min-width: 1025px) {
+    .mobile {
+      display: none !important;
+    }
+    .tab {
+      display: none !important;
+    }
+  }
+  
+  
+  /* Mobile view (max-width: 1024px) */
+  @media (max-width: 1024px) {
+    .de-view {
+      display: none !important;
+    }
+    .mo-view {
+      display: block !important;
+    }
+    .ta-view {
+      display: none !important;
+    }
+  }
+  
+  /* Tablet view (min-width: 768px and max-width: 1024px) */
+  @media (min-width: 768px) and (max-width: 1024px) {
+    .de-view {
+      display: none !important;
+    }
+    .mo-view {
+      display: none !important;
+    }
+    .ta-view {
+      display: block !important;
+    }
+  }
+  
+  /* Desktop view (min-width: 1025px) */
+  @media (min-width: 1025px) {
+    .mo-view {
+      display: none !important;
+    }
+    .ta-view {
+      display: none !important;
+    }
+    .de-view {
+      display: block !important;
+    }
+  }
+  .card-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 20px;
+    border-top-left-radius: 25px;
+    border-top-right-radius: 25px;
+    transform: translateY(60%);
+    transition: transform 0.4s ease-in-out;
+    height: 100%;
+    overflow-y: auto;
+  }
+  
+  .card:hover .card-content {
+    transform: translateY(0);
+  }
+  
+  /* Optional: Add scroll styling if overflow */
+  .card-content::-webkit-scrollbar {
+    width: 5px;
+  }
+  .card-content::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+  }
+  
+  
+  
