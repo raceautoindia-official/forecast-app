@@ -1,13 +1,13 @@
-// File: app/components/CreateGraph.js
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { Form, Input, Select, Button, message, Space } from 'antd';
+import React, { useEffect, useState, useCallback } from 'react';
+import { Form, Input, Select, Button, message, Space, Spin } from 'antd';
 
 export default function CreateGraph() {
   const [form] = Form.useForm();
   const [datasets, setDatasets] = useState([]);
   const [hierarchyMap, setHierarchyMap] = useState({});
+  const [loading, setLoading] = useState(true);
 
   const forecastTypes = [
     { label: 'Linear Regression', value: 'linear' },
@@ -20,46 +20,48 @@ export default function CreateGraph() {
   ];
 
   useEffect(() => {
-    // Fetch both volumeData and contentHierarchy in parallel
-    Promise.all([
-      fetch('/api/volumeData').then(r => r.json()),
-      fetch('/api/contentHierarchy').then(r => r.json())
-    ]).then(([volRows, hierarchy]) => {
-      // build a lookup: id -> name
-      const map = Object.fromEntries(hierarchy.map(n => [n.id.toString(), n.name]));
-      setHierarchyMap(map);
-
-      // now map each volume_data row into a Select option
-      const opts = volRows.map(d => {
-        const streamNames = d.stream
-          .split(',')
-          .map(id => map[id] || id)
-          .join(' > ');
-        const date = new Date(d.createdAt).toLocaleDateString();
-        return {
-          label: `#${d.id} — ${streamNames} (${date})`,
-          value: d.id
-        };
-      });
-      setDatasets(opts);
-    })
-    .catch(err => {
-      console.error(err);
-      message.error('Failed to load datasets or hierarchy');
-    });
+    async function loadData() {
+      try {
+        setLoading(true);
+        const [volRows, hierarchy] = await Promise.all([
+          fetch('/api/volumeData').then(r => r.json()),
+          fetch('/api/contentHierarchy').then(r => r.json()),
+        ]);
+        const map = Object.fromEntries(hierarchy.map(n => [n.id.toString(), n.name]));
+        setHierarchyMap(map);
+        const opts = volRows.map(d => {
+          const streamNames = d.stream
+            .split(',')
+            .map(id => map[id] || id)
+            .join(' > ');
+          const date = new Date(d.createdAt).toLocaleDateString();
+          return { label: `#${d.id} — ${streamNames} (${date})`, value: d.id };
+        });
+        setDatasets(opts);
+      } catch (e) {
+        console.error(e);
+        message.error('Failed to load datasets or hierarchy');
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
   }, []);
 
-  const onFinish = async (values) => {
+  const onFinish = useCallback(async values => {
     try {
+      const payload = {
+        name: values.name,
+        datasetIds: values.datasetIds,
+        chartType: values.chartType,
+      };
+      if (values.chartType === 'line' && values.forecastTypes) {
+        payload.forecastTypes = values.forecastTypes;
+      }
       const res = await fetch('/api/graphs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name:           values.name,
-          datasetIds:     values.datasetIds,
-          forecastTypes:  values.forecastTypes,
-          chartType:      values.chartType,
-        })
+        body: JSON.stringify(payload),
       });
       if (!res.ok) {
         const err = await res.json();
@@ -69,10 +71,13 @@ export default function CreateGraph() {
       message.success(`Graph "${created.name}" (#${created.id}) created!`);
       form.resetFields();
     } catch (e) {
-      message.error(e.message);
+      message.error(e.message || 'Creation failed');
     }
-  };
-  
+  }, [form]);
+
+  if (loading) {
+    return <Spin tip="Loading datasets..." style={{ display: 'block', marginTop: 50 }} />;
+  }
 
   return (
     <div style={{ maxWidth: 600, margin: '0 auto', padding: 16 }}>
@@ -81,10 +86,7 @@ export default function CreateGraph() {
         form={form}
         layout="vertical"
         onFinish={onFinish}
-        initialValues={{
-          chartType:    'line',
-          forecastTypes: ['linear'],
-        }}
+        initialValues={{ chartType: 'line' }}
       >
         <Form.Item
           name="name"
@@ -97,9 +99,7 @@ export default function CreateGraph() {
         <Form.Item
           name="datasetIds"
           label="Historical Datasets"
-          rules={[
-            { required: true, type: 'array', min: 1, message: 'Select at least one dataset' }
-          ]}
+          rules={[{ required: true, type: 'array', min: 1, message: 'Select at least one dataset' }]}
         >
           <Select
             mode="multiple"
@@ -110,29 +110,27 @@ export default function CreateGraph() {
         </Form.Item>
 
         <Form.Item
-          name="forecastTypes"
-          label="Forecast Methods"
-          rules={[
-            { required: true, type: 'array', min: 1, message: 'Select at least one method' }
-          ]}
-        >
-          <Select
-            mode="multiple"
-            placeholder="Select forecasting methods"
-            options={forecastTypes}
-            allowClear
-          />
-        </Form.Item>
-
-        <Form.Item
           name="chartType"
           label="Chart Type"
           rules={[{ required: true, message: 'Select a chart type' }]}
         >
-          <Select
-            placeholder="Select chart visualization"
-            options={chartTypes}
-          />
+          <Select placeholder="Select chart visualization" options={chartTypes} />
+        </Form.Item>
+
+        {/* Conditionally render Forecast Methods for Line Chart */}
+        <Form.Item noStyle dependencies={["chartType"]}>
+          {({ getFieldValue }) =>
+            getFieldValue('chartType') === 'line' ? (
+              <Form.Item name="forecastTypes"$1$2>
+                <Select
+                  mode="multiple"
+                  placeholder="Select forecasting methods"
+                  options={forecastTypes}
+                  allowClear
+                />
+              </Form.Item>
+            ) : null
+          }
         </Form.Item>
 
         <Form.Item>
@@ -149,4 +147,3 @@ export default function CreateGraph() {
     </div>
   );
 }
-

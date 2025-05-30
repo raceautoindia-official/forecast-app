@@ -1,269 +1,444 @@
-'use client';
-import React, { useState, useEffect } from 'react';
-import ReactFlow, { Background, Controls, ReactFlowProvider, useNodesState, useEdgesState } from 'reactflow';
-import dagre from 'dagre';
-import 'reactflow/dist/style.css';
-import { Button, Modal, Input, message } from 'antd';
-import { DeleteOutlined, PlusOutlined, EditOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+"use client";
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  useRef,
+} from "react";
+import ReactFlow, {
+  Background,
+  Controls,
+  ReactFlowProvider,
+  useNodesState,
+  useEdgesState,
+} from "reactflow";
+import dagre from "dagre";
+import "reactflow/dist/style.css";
+import { Button, Modal, Input, message, Spin, Empty, Select } from "antd";
+import {
+  DeleteOutlined,
+  PlusOutlined,
+  EditOutlined,
+  ExclamationCircleOutlined,
+} from "@ant-design/icons";
 
 const { confirm } = Modal;
+const { Search } = Input;
+const { Option } = Select;
 const nodeWidth = 172;
 const nodeHeight = 36;
 
-const getLayoutedElements = (nodes, edges, direction = 'TB') => {
-  const dagreGraph = new dagre.graphlib.Graph();
-  dagreGraph.setDefaultEdgeLabel(() => ({}));
-  dagreGraph.setGraph({ rankdir: direction });
+// Auto-layout with Dagre and styled nodes/edges
+const getLayoutedElements = (nodes, edges, direction = "TB") => {
+  const graph = new dagre.graphlib.Graph();
+  graph.setDefaultEdgeLabel(() => ({}));
+  graph.setGraph({ rankdir: direction });
 
-  nodes.forEach(node => {
-    dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
+  nodes.forEach((node) => {
+    graph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
   });
-  edges.forEach(edge => {
-    dagreGraph.setEdge(edge.source, edge.target);
+  edges.forEach((edge) => {
+    graph.setEdge(edge.source, edge.target);
   });
-  dagre.layout(dagreGraph);
+
+  dagre.layout(graph);
 
   return {
-    nodes: nodes.map(node => ({
-      ...node,
-      position: {
-        x: dagreGraph.node(node.id).x - nodeWidth / 2,
-        y: dagreGraph.node(node.id).y - nodeHeight / 2
-      }
+    nodes: nodes.map((node) => {
+      const { x, y } = graph.node(node.id);
+      return {
+        ...node,
+        position: { x: x - nodeWidth / 2, y: y - nodeHeight / 2 },
+        style: {
+          background: "#fff",
+          border: "2px solid #1890ff",
+          borderRadius: 8,
+          padding: 8,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+          fontSize: 14,
+          color: "#333",
+        },
+      };
+    }),
+    edges: edges.map((edge) => ({
+      ...edge,
+      animated: true,
+      style: { stroke: "#1890ff", strokeWidth: 2 },
     })),
-    edges
   };
 };
 
 export default function ContentHierarchyFlow() {
+  // raw nodes/edges
+  const [rawNodes, setRawNodes] = useState([]);
+  const [rawEdges, setRawEdges] = useState([]);
+
+  // React Flow state
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+
+  // selected node
   const [selectedNodeId, setSelectedNodeId] = useState(null);
   const [selectedNode, setSelectedNode] = useState(null);
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [newNodeName, setNewNodeName] = useState('');
+
+  // cascade dropdown state
+  const [cascadeSelection, setCascadeSelection] = useState([]);
+
+  // modal/form state
+  const [isAddModalVisible, setIsAddModalVisible] = useState(false);
+  const [newNodeName, setNewNodeName] = useState("");
   const [parentId, setParentId] = useState(null);
   const [isRenameModalVisible, setIsRenameModalVisible] = useState(false);
-  const [renameValue, setRenameValue] = useState('');
+  const [renameValue, setRenameValue] = useState("");
 
-  const fetchHierarchy = async () => {
-    try {
-      const res = await fetch('/api/contentHierarchy');
-      const data = await res.json();
-      const rfNodes = data.map(node => ({
-        id: node.id.toString(),
-        data: { label: node.name },
-        position: { x: 0, y: 0 },
-        parent_id: node.parent_id
-      }));
-      const rfEdges = data.filter(node => node.parent_id).map(node => ({
-        id: `e${node.parent_id}-${node.id}`,
-        source: node.parent_id.toString(),
-        target: node.id.toString(),
-        animated: true
-      }));
-      const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(rfNodes, rfEdges);
-      setNodes(layoutedNodes);
-      setEdges(layoutedEdges);
-      if (selectedNodeId) {
-        setSelectedNode(layoutedNodes.find(n => n.id === selectedNodeId.toString()) || null);
+  // UI state
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [modalLoading, setModalLoading] = useState(false);
+
+  // React Flow instance & wrapper
+  const [rfInstance, setRfInstance] = useState(null);
+  const reactFlowWrapper = useRef(null);
+
+  // fetch hierarchy once
+  const fetchHierarchy = useCallback(() => {
+    const controller = new AbortController();
+    (async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch("/api/contentHierarchy", {
+          signal: controller.signal,
+        });
+        if (!res.ok) throw new Error("Fetch failed");
+        const data = await res.json();
+        setRawNodes(
+          data.map((n) => ({
+            id: String(n.id),
+            data: { label: n.name },
+            parent_id: n.parent_id,
+          }))
+        );
+        setRawEdges(
+          data
+            .filter((n) => n.parent_id)
+            .map((n) => ({
+              id: `e${n.parent_id}-${n.id}`,
+              source: String(n.parent_id),
+              target: String(n.id),
+            }))
+        );
+      } catch (e) {
+        if (e.name !== "AbortError") setError(e.message);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error('Error fetching content hierarchy:', error);
-    }
-  };
+    })();
+    return () => controller.abort();
+  }, []);
 
   useEffect(() => {
     fetchHierarchy();
-  }, []);
+  }, [fetchHierarchy]);
 
-  const onNodeClick = (event, node) => {
-    setSelectedNodeId(node.id);
-    setSelectedNode(node);
-  };
+  // layout computation
+  const { nodes: layoutedNodes, edges: layoutedEdges } = useMemo(
+    () => getLayoutedElements(rawNodes, rawEdges),
+    [rawNodes, rawEdges]
+  );
+  useEffect(() => {
+    setNodes(layoutedNodes);
+    setEdges(layoutedEdges);
+  }, [layoutedNodes, layoutedEdges]);
 
-  const onAddNodeClick = () => {
-    setParentId(selectedNode ? parseInt(selectedNode.id) : null);
-    setIsModalVisible(true);
-  };
+  // highlight the selected node
+  useEffect(() => {
+    setNodes(
+      layoutedNodes.map((node) => {
+        const baseStyle = node.style;
+        return {
+          ...node,
+          style:
+            node.id === selectedNodeId
+              ? {
+                  ...baseStyle,
+                  background: "#fffb8f",
+                  border: "2px solid #ffd21d",
+                }
+              : baseStyle,
+        };
+      })
+    );
+    setEdges(layoutedEdges);
+  }, [layoutedNodes, layoutedEdges, selectedNodeId]);
 
-  const onAddNode = async () => {
-    if (!newNodeName) {
-      message.error('Enter a node name');
-      return;
-    }
-    try {
-      const res = await fetch('/api/contentHierarchy', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ parent_id: parentId, name: newNodeName })
+  // build parent->children map
+  const childrenMap = useMemo(
+    () =>
+      rawNodes.reduce((map, n) => {
+        const key = n.parent_id ? String(n.parent_id) : "root";
+        (map[key] = map[key] || []).push(n);
+        return map;
+      }, {}),
+    [rawNodes]
+  );
+
+  // focus on node (top-center)
+  const focusNode = useCallback(
+    (id) => {
+      const node = layoutedNodes.find((n) => n.id === id);
+      if (node && rfInstance && reactFlowWrapper.current) {
+        const zoom = 1.5;
+        const { width } = reactFlowWrapper.current.getBoundingClientRect();
+        const x = width / 2 - node.position.x * zoom;
+        const y = 50 - node.position.y * zoom;
+        rfInstance.setViewport({ x, y, zoom });
+        setSelectedNodeId(id);
+        setSelectedNode(node);
+      }
+    },
+    [layoutedNodes, rfInstance]
+  );
+
+  // cascade dropdown handler
+  const handleLevelSelect = useCallback(
+    (level, id) => {
+      setCascadeSelection((prev) => {
+        const arr = prev.slice(0, level);
+        arr[level] = id;
+        return arr;
       });
-      if (res.ok) {
-        message.success('Node added successfully');
-        setIsModalVisible(false);
-        setNewNodeName('');
-        fetchHierarchy();
-        window.dispatchEvent(new Event('content-hierarchy-updated'));
-      } else {
-        const err = await res.json();
-        message.error(err.error);
-      }
-    } catch (error) {
-      console.error('Add node error:', error);
-      message.error('Error adding node');
-    }
-  };
+      id && focusNode(id);
+    },
+    [focusNode]
+  );
 
-  const showDeleteConfirm = () => {
-    confirm({
-      title: 'Are you sure you want to delete this node?',
-      icon: <ExclamationCircleOutlined />,
-      content: 'This action cannot be undone.',
-      okText: 'Yes, Delete',
-      okType: 'danger',
-      cancelText: 'Cancel',
-      onOk() {
-        deleteNode();
-      }
-    });
-  };
-
-  const deleteNode = async () => {
-    if (!selectedNodeId) {
-      message.error('No node selected');
-      return;
-    }
+  // node operations
+  const onAddNode = useCallback(async () => {
+    if (!newNodeName.trim()) return message.error("Enter node name");
+    setModalLoading(true);
     try {
-      const res = await fetch('/api/contentHierarchy', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: parseInt(selectedNodeId) })
+      const res = await fetch("/api/contentHierarchy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ parent_id: parentId, name: newNodeName }),
       });
-      if (res.ok) {
-        message.success('Node deleted successfully');
-        setSelectedNodeId(null);
-        setSelectedNode(null);
-        fetchHierarchy();
-        window.dispatchEvent(new Event('content-hierarchy-updated'));
-      } else {
-        message.error('Error deleting node');
-      }
-    } catch (error) {
-      console.error('Delete node error:', error);
-      message.error('Error deleting node');
+      if (!res.ok) throw new Error("Add failed");
+      message.success("Node added");
+      setIsAddModalVisible(false);
+      setNewNodeName("");
+      fetchHierarchy();
+    } catch (e) {
+      message.error(e.message);
+    } finally {
+      setModalLoading(false);
     }
-  };
+  }, [newNodeName, parentId, fetchHierarchy]);
 
-  const showRenameModal = () => {
-    if (selectedNode) {
-      setRenameValue(selectedNode.data.label);
-      setIsRenameModalVisible(true);
-    }
-  };
-
-  const renameNode = async () => {
-    if (!renameValue.trim()) {
-      message.error('Enter a new name');
-      return;
-    }
+  const deleteNode = useCallback(async () => {
+    if (!selectedNodeId) return message.error("Select a node first");
+    setModalLoading(true);
     try {
-      const res = await fetch('/api/contentHierarchy', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: parseInt(selectedNode.id), name: renameValue })
+      const res = await fetch("/api/contentHierarchy", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: Number(selectedNodeId) }),
       });
-      if (res.ok) {
-        message.success('Node renamed successfully');
-        setIsRenameModalVisible(false);
-        fetchHierarchy();
-        window.dispatchEvent(new Event('content-hierarchy-updated'));
-      } else {
-        const err = await res.json();
-        message.error(err.error);
-      }
-    } catch (err) {
-      console.error('Rename error:', err);
-      message.error('Error renaming node');
+      if (!res.ok) throw new Error("Delete failed");
+      message.success("Node deleted");
+      setSelectedNodeId(null);
+      setSelectedNode(null);
+      fetchHierarchy();
+    } catch (e) {
+      message.error(e.message);
+    } finally {
+      setModalLoading(false);
     }
-  };
+  }, [selectedNodeId, fetchHierarchy]);
+
+  const renameNode = useCallback(async () => {
+    if (!renameValue.trim()) return message.error("Enter new name");
+    setModalLoading(true);
+    try {
+      const res = await fetch("/api/contentHierarchy", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: Number(selectedNodeId), name: renameValue }),
+      });
+      if (!res.ok) throw new Error("Rename failed");
+      message.success("Node renamed");
+      setIsRenameModalVisible(false);
+      fetchHierarchy();
+    } catch (e) {
+      message.error(e.message);
+    } finally {
+      setModalLoading(false);
+    }
+  }, [renameValue, selectedNodeId, fetchHierarchy]);
+
+  // search handler
+  const onSearchNode = useCallback(
+    (val) => {
+      const found = rawNodes.find((n) =>
+        n.data.label.toLowerCase().includes(val.toLowerCase())
+      );
+      found ? focusNode(found.id) : message.error("Not found");
+    },
+    [rawNodes, focusNode]
+  );
+
+  // loading / error
+  if (loading)
+    return <Spin tip="Loading..." style={{ width: "100%", marginTop: 20 }} />;
+  if (error) return <Empty description={error} style={{ marginTop: 20 }} />;
+
+  // build cascade dropdowns
+  const dropdowns = [];
+  let parent = "root";
+  for (let lvl = 0; ; lvl++) {
+    const list = childrenMap[parent] || [];
+    if (lvl > 0 && (!cascadeSelection[lvl - 1] || !list.length)) break;
+    dropdowns.push(
+      <Select
+        key={lvl}
+        placeholder={`Level ${lvl}`}
+        style={{ minWidth: 140, marginRight: 8, marginBottom: 8 }}
+        value={cascadeSelection[lvl] || null}
+        onChange={(v) => handleLevelSelect(lvl, v)}
+        allowClear
+      >
+        {list.map((n) => (
+          <Option key={n.id} value={n.id}>
+            {n.data.label}
+          </Option>
+        ))}
+      </Select>
+    );
+    parent = cascadeSelection[lvl] || "root";
+    if (!cascadeSelection[lvl]) break;
+  }
 
   return (
-    <div style={{ height: '80vh', border: '1px solid #ddd', borderRadius: '4px', position: 'relative' }}>
-      <div style={{ padding: '0.5rem' }}>
-        <Button type="primary" icon={<PlusOutlined />} onClick={onAddNodeClick}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "80vh",
+        border: "1px solid #ccc",
+        borderRadius: 6,
+        background: "#f9f9f9",
+      }}
+    >
+      <div
+        style={{
+          padding: 12,
+          background: "#fff",
+          borderBottom: "1px solid #e8e8e8",
+        }}
+      >
+        <div style={{ display: "flex", flexWrap: "wrap" }}>{dropdowns}</div>
+        <Search
+          placeholder="Search Node"
+          onSearch={onSearchNode}
+          style={{ width: 240, marginBottom: 8 }}
+          allowClear
+        />
+        <Button
+          icon={<PlusOutlined />}
+          type="primary"
+          style={{ marginRight: 8 }}
+          onClick={() => {
+            setParentId(selectedNode ? selectedNode.id : null);
+            setIsAddModalVisible(true);
+          }}
+        >
           Add Node
         </Button>
         {selectedNode && (
           <>
             <Button
-              type="primary"
               danger
               icon={<DeleteOutlined />}
-              onClick={showDeleteConfirm}
-              style={{ marginLeft: '0.5rem' }}
+              style={{ marginRight: 8 }}
+              onClick={() =>
+                confirm({
+                  title: "Confirm delete?",
+                  icon: <ExclamationCircleOutlined />,
+                  onOk: deleteNode,
+                })
+              }
             >
-              Delete Selected Node
+              Delete
             </Button>
             <Button
               icon={<EditOutlined />}
-              onClick={showRenameModal}
-              style={{ marginLeft: '0.5rem' }}
+              onClick={() => {
+                setRenameValue(selectedNode.data.label);
+                setIsRenameModalVisible(true);
+              }}
             >
-              Rename Selected Node
+              Rename
             </Button>
           </>
         )}
-        <div style={{ marginTop: '0.5rem' }}>
-          <strong>Selected Node:</strong>{' '}
-          {selectedNode ? `${selectedNode.data.label} (ID: ${selectedNode.id})` : 'None'}
+        <div style={{ marginTop: 8 }}>
+          {selectedNode ? (
+            <>
+              <strong>Selected Node:</strong>{' '}
+              <span>{selectedNode.data.label} (ID: {selectedNode.id})</span>
+            </>
+          ) : (
+            'No selection'
+          )}
         </div>
       </div>
-      <ReactFlowProvider>
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onNodeClick={onNodeClick}
-          fitView
-        >
-          <Background />
-          <Controls />
-        </ReactFlow>
-      </ReactFlowProvider>
-
-      {/* Add Node Modal */}
+      <div ref={reactFlowWrapper} style={{ flex: 1, minHeight: 0 }}>
+        <ReactFlowProvider>
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onInit={(instance) => {
+              setRfInstance(instance);
+              instance.fitView({ padding: 0.1 });
+            }}
+            onNodeClick={(e, n) => focusNode(n.id)}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            nodesDraggable={false}
+            style={{ width: "100%", height: "100%", background: "#f0f2f5" }}
+          >
+            <Background color="#888" gap={16} size={1} />
+            {/* <Controls showInteractive={false} style={{ right: 12, top: 12 }} /> */}
+          </ReactFlow>
+        </ReactFlowProvider>
+      </div>
       <Modal
-        title="Add New Node"
-        open={isModalVisible}
+        title="Add Node"
+        open={isAddModalVisible}
         onOk={onAddNode}
-        onCancel={() => setIsModalVisible(false)}
+        confirmLoading={modalLoading}
+        onCancel={() => setIsAddModalVisible(false)}
       >
         <Input
-          placeholder="Enter node name"
           value={newNodeName}
           onChange={(e) => setNewNodeName(e.target.value)}
+          placeholder="Node name"
         />
-        {parentId && <p>Parent Node ID: {parentId}</p>}
       </Modal>
-
-      {/* Rename Modal */}
       <Modal
         title="Rename Node"
         open={isRenameModalVisible}
         onOk={renameNode}
+        confirmLoading={modalLoading}
         onCancel={() => setIsRenameModalVisible(false)}
       >
         <Input
           value={renameValue}
           onChange={(e) => setRenameValue(e.target.value)}
-          placeholder="New node name"
+          placeholder="New name"
         />
       </Modal>
     </div>
   );
 }
-
-
-
-

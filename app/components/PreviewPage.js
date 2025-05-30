@@ -319,13 +319,8 @@ export default function PreviewPage() {
   };
 
   console.log("chartdata ", chartData);
-  // console.log("allregions ", allRegions);
-  // console.log("historicalvolumes ", historicalVolumes);
-  // console.log("forecastDataScore ", forecastDataScore);
-  // console.log("forecastDataLR " ,forecastDataLR);
-  // console.log("bothData " ,bothData);
+  console.log("bothdata " , bothData);
   
-
   const getColor = i => ["#1039EE","#23DD1D","#38CCD4","#F58C1F"][i % 4];
 
   return (

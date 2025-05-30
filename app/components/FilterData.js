@@ -1,22 +1,18 @@
 'use client';
 import { useState, useEffect, useMemo } from 'react';
-import { Table, Select, Button, message } from 'antd';
+import { Table, Select, Button, message, Descriptions } from 'antd';
 
 export default function FilterData() {
   const [contentHierarchy, setContentHierarchy] = useState([]);
   const [streamDropdowns, setStreamDropdowns] = useState([]);
   const [streamSelection, setStreamSelection] = useState([]);
   const [volumeData, setVolumeData] = useState([]);
-
-  // Row/column filter state
   const [rowOptions, setRowOptions] = useState([]);
   const [colOptions, setColOptions] = useState([]);
   const [selectedRow, setSelectedRow] = useState(null);
-  const [selectedCol, setSelectedCol] = useState(null);
-
-  // Table checkbox selection
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
+  // load hierarchy
   useEffect(() => {
     fetch('/api/contentHierarchy')
       .then(res => res.json())
@@ -27,7 +23,7 @@ export default function FilterData() {
       });
   }, []);
 
-  // helper to fetch & flatten volume data for a given stream path
+  // fetch & flatten data
   const fetchAndFlatten = (path) => {
     fetch(`/api/filterVolumeData?stream=${path.join(',')}`)
       .then(res => res.ok ? res.json() : Promise.reject())
@@ -37,16 +33,11 @@ export default function FilterData() {
           const matrix = typeof entry.data === 'string'
             ? JSON.parse(entry.data)
             : entry.data;
-          const names = entry.stream
-            .split(',')
-            .map(id => contentHierarchy.find(n => n.id.toString() === id)?.name)
-            .filter(Boolean)
-            .join(' > ');
           Object.entries(matrix).forEach(([r, cols]) => {
             Object.entries(cols).forEach(([c, v]) => {
               flat.push({
                 id: entry.id,
-                stream: names,
+                stream: entry.stream,
                 row: r,
                 column: c,
                 value: v,
@@ -56,79 +47,80 @@ export default function FilterData() {
           });
         });
         setVolumeData(flat);
-
-        // build row/col filter options
-        setRowOptions(Array.from(new Set(flat.map(d => d.row))).map(r => ({ label: r, value: r })));
-        setColOptions(Array.from(new Set(flat.map(d => d.column))).map(c => ({ label: c, value: c })));
+        setRowOptions([...new Set(flat.map(d => d.row))]);
+        setColOptions([...new Set(flat.map(d => d.column))]);
       })
       .catch(() => message.error('Error fetching volume data'));
   };
 
+  // update dropdown
   const updateStreamDropdown = (selectedId, levelIndex) => {
     const updated = [...streamDropdowns];
     updated[levelIndex].selected = selectedId;
     updated.splice(levelIndex + 1);
     const children = contentHierarchy.filter(n => n.parent_id === parseInt(selectedId));
-    if (children.length) {
-      updated.push({ level: levelIndex + 1, options: children, selected: null });
-    }
+    if (children.length) updated.push({ level: levelIndex + 1, options: children, selected: null });
     setStreamDropdowns(updated);
 
     const path = updated.map(d => d.selected).filter(Boolean);
     setStreamSelection(path);
-
-    // reset row/col filters & checkboxes
     setSelectedRowKeys([]);
     setSelectedRow(null);
-    setSelectedCol(null);
-
-    if (path.length) {
-      fetchAndFlatten(path);
-    } else {
-      setVolumeData([]);
-      setRowOptions([]);
-      setColOptions([]);
-    }
+    if (path.length) fetchAndFlatten(path);
+    else setVolumeData([]);
   };
 
-  const filteredData = useMemo(() =>
-    volumeData.filter(d =>
-      (!selectedRow || d.row === selectedRow) &&
-      (!selectedCol || d.column === selectedCol)
-    ),
-    [volumeData, selectedRow, selectedCol]
-  );
+  // pivot data
+  const pivotData = useMemo(() => {
+    const grouped = {};
+    volumeData.forEach(({ row, column, value }) => {
+      if (!grouped[row]) grouped[row] = { key: row, row };
+      grouped[row][column] = value;
+    });
+    return Object.values(grouped);
+  }, [volumeData]);
 
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: setSelectedRowKeys,
-  };
+  // dynamic columns
+  const pivotColumns = useMemo(() => {
+    const cols = [{ title: 'Row', dataIndex: 'row', key: 'row' }];
+    colOptions.forEach(c => cols.push({ title: c, dataIndex: c, key: c }));
+    return cols;
+  }, [colOptions]);
+
+  // filtered rows
+  const filteredPivotData = useMemo(() => {
+    return pivotData.filter(r => !selectedRow || r.row === selectedRow);
+  }, [pivotData, selectedRow]);
+
+  // header
+  const headerInfo = useMemo(() => {
+    if (!volumeData.length) return null;
+    // Convert comma-separated IDs to names
+    const ids = volumeData[0].stream.split(',');
+    const names = ids
+      .map(id => contentHierarchy.find(n => String(n.id) === id)?.name)
+      .filter(Boolean)
+      .join(' > ');
+    const created_at = volumeData[0].created_at;
+    return { stream: names, created_at };
+  }, [volumeData, contentHierarchy]);
+
+  const rowSelection = { selectedRowKeys, onChange: setSelectedRowKeys };
 
   const deleteSelected = async () => {
     if (!selectedRowKeys.length) return;
     try {
-      const cells = selectedRowKeys.map(key => {
-        const [id, row, column] = key.split('||');
-        return { id: Number(id), row, column };
+      const cells = selectedRowKeys.flatMap(key => {
+        const [id, row] = key.split('||');
+        return volumeData
+          .filter(d => d.id.toString() === id && d.row === row)
+          .map(d => ({ id: d.id, row: d.row, column: d.column }));
       });
-      const res = await fetch('/api/volumeData', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cells })
-      });
+      const res = await fetch('/api/volumeData', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cells }) });
       if (!res.ok) throw new Error();
-
       message.success('Deleted successfully');
-
-      // clear row/col filters & checkboxes
       setSelectedRowKeys([]);
-      setSelectedRow(null);
-      setSelectedCol(null);
-
-      // re-fetch with the exact same stream path
-      if (streamSelection.length) {
-        fetchAndFlatten(streamSelection);
-      }
+      fetchAndFlatten(streamSelection);
     } catch {
       message.error('Delete failed');
     }
@@ -150,56 +142,40 @@ export default function FilterData() {
         ))}
       </div>
 
+      {headerInfo && (
+        <Descriptions size="small" column={2} style={{ marginBottom: 16 }}>
+          <Descriptions.Item label="Stream">{headerInfo.stream}</Descriptions.Item>
+          <Descriptions.Item label="Created At">{headerInfo.created_at}</Descriptions.Item>
+        </Descriptions>
+      )}
+
       {rowOptions.length > 0 && (
         <Select
           placeholder="Filter by Row"
-          style={{ width: 200, marginRight: 8, marginBottom: 16 }}
-          options={rowOptions}
+          style={{ width: 200, marginBottom: 16 }}
+          options={rowOptions.map(r => ({ label: r, value: r }))}
           allowClear
           value={selectedRow}
           onChange={setSelectedRow}
         />
       )}
-      {colOptions.length > 0 && (
-        <Select
-          placeholder="Filter by Column"
-          style={{ width: 200, marginBottom: 16 }}
-          options={colOptions}
-          allowClear
-          value={selectedCol}
-          onChange={setSelectedCol}
-        />
-      )}
 
       <div style={{ marginBottom: 16 }}>
-        <Button
-          type="primary" danger
-          onClick={deleteSelected}
-          disabled={!selectedRowKeys.length}
-        >
+        <Button type="primary" danger onClick={deleteSelected} disabled={!selectedRowKeys.length}>
           Delete Selected
         </Button>
         {selectedRowKeys.length > 0 && (
-          <span style={{ marginLeft: 8 }}>
-            {selectedRowKeys.length} item(s) selected
-          </span>
+          <span style={{ marginLeft: 8 }}>{selectedRowKeys.length} row(s) selected</span>
         )}
       </div>
 
       <Table
         rowSelection={{ type: 'checkbox', ...rowSelection }}
-        dataSource={filteredData}
-        columns={[
-          { title: 'Stream',     dataIndex: 'stream'     },
-          { title: 'Row',        dataIndex: 'row'        },
-          { title: 'Column',     dataIndex: 'column'     },
-          { title: 'Value',      dataIndex: 'value'      },
-          { title: 'Created At', dataIndex: 'created_at' }
-        ]}
-        rowKey={rec => `${rec.id}||${rec.row}||${rec.column}`}
-        pagination={{ pageSize: 20 }}
+        dataSource={filteredPivotData.map(r => ({ ...r, key: `${volumeData.find(d => d.row===r.row).id}||${r.row}` }))}
+        columns={pivotColumns}
+        pagination={false}
+        scroll={{ x: 'max-content', y: 400 }}
       />
     </>
   );
 }
-

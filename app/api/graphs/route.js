@@ -26,8 +26,8 @@ export async function POST(req) {
       !name ||
       !Array.isArray(datasetIds) ||
       !datasetIds.length ||
-      !Array.isArray(forecastTypes) ||
-      !forecastTypes.length ||
+      // !Array.isArray(forecastTypes) ||
+      // !forecastTypes.length ||
       !chartType
     ) {
       return new Response(

@@ -4,6 +4,7 @@ import { Pagination, Navigation } from "swiper/modules"; // Only import once
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
+import './score.css';
 
 import Image from "next/image";
 import React, { useState, useRef, useEffect } from "react";
@@ -763,34 +764,6 @@ export default function Table() {
         </div>
 
         <div className="container-fluid mt-3 fw-bold">
-          {/* <div
-            className="d-flex justify-content-between align-items-center p-2 ms-1 mt-4"
-            style={{
-              backgroundColor: "rgba(204, 250, 236, 0.80)",
-              borderRadius: "8px",
-            }}
-          >
-            <h3 style={{ color: "#12298C" }}>KEY DRIVERS</h3>
-            <div
-              className="d-flex gap-4 "
-              style={{ fontSize: "1.20rem", marginRight: "107px" }}
-            >
-              {[
-                "2025-2026",
-                "2026-2027",
-                "2027-2028",
-                "2028-2029",
-                "2029-2030",
-              ].map((year, index) => (
-                <h5
-                  key={index}
-                  style={{ color: "#1D478A", fontSize: "inherit" }}
-                >
-                  {year}
-                </h5>
-              ))}
-            </div>
-          </div> */}
         </div>
         <div className="container-fluid mt-3 fw-bold">
           <Swiper

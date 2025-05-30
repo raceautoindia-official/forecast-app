@@ -80,11 +80,18 @@ export default function GraphList() {
     {
       title: 'Forecast Methods',
       dataIndex: 'forecast_types',
-      render: f => f.map(m => (
-        <Tag key={m}>
-          {m === 'linear' ? 'Linear Regression' : 'Score-Based'}
-        </Tag>
-      ))
+      render: ft => {
+        // default to empty array if missing:
+        const methods = Array.isArray(ft) ? ft : [];
+        if (methods.length === 0) {
+          return <em>N/A</em>;
+        }
+        return methods.map(m => (
+          <Tag key={m}>
+            {m === 'linear' ? 'Linear Regression' : 'Score-Based'}
+          </Tag>
+        ));
+      }
     },
     {
       title: 'Chart',

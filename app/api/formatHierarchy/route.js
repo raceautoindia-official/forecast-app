@@ -89,6 +89,7 @@ export async function POST(req) {
 export async function DELETE(req) {
   try {
     const body = await req.json();
+    console.log(body);
     const { id } = body;
     await pool.query('DELETE FROM format_hierarchy WHERE id = ?', [id]);
     return new Response(JSON.stringify({ message: 'Deleted successfully' }), {
