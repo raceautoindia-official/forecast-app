@@ -1,6 +1,6 @@
-'use client';
-import { useState, useEffect, useMemo } from 'react';
-import { Table, Select, Button, message, Descriptions } from 'antd';
+"use client";
+import { useState, useEffect, useMemo } from "react";
+import { Table, Select, Button, message, Descriptions } from "antd";
 
 export default function FilterData() {
   const [contentHierarchy, setContentHierarchy] = useState([]);
@@ -14,25 +14,34 @@ export default function FilterData() {
 
   // load hierarchy
   useEffect(() => {
-    fetch('/api/contentHierarchy')
-      .then(res => res.json())
-      .then(data => {
+    fetch("/api/contentHierarchy", {
+      headers: {
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
         setContentHierarchy(data);
-        const roots = data.filter(n => n.parent_id === null);
+        const roots = data.filter((n) => n.parent_id === null);
         setStreamDropdowns([{ level: 0, options: roots, selected: null }]);
       });
   }, []);
 
   // fetch & flatten data
   const fetchAndFlatten = (path) => {
-    fetch(`/api/filterVolumeData?stream=${path.join(',')}`)
-      .then(res => res.ok ? res.json() : Promise.reject())
-      .then(data => {
+    fetch(`/api/filterVolumeData?stream=${path.join(",")}`, {
+      headers: {
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`,
+      },
+    })
+      .then((res) => (res.ok ? res.json() : Promise.reject()))
+      .then((data) => {
         const flat = [];
-        data.forEach(entry => {
-          const matrix = typeof entry.data === 'string'
-            ? JSON.parse(entry.data)
-            : entry.data;
+        data.forEach((entry) => {
+          const matrix =
+            typeof entry.data === "string"
+              ? JSON.parse(entry.data)
+              : entry.data;
           Object.entries(matrix).forEach(([r, cols]) => {
             Object.entries(cols).forEach(([c, v]) => {
               flat.push({
@@ -41,16 +50,16 @@ export default function FilterData() {
                 row: r,
                 column: c,
                 value: v,
-                created_at: entry.created_at
+                created_at: entry.created_at,
               });
             });
           });
         });
         setVolumeData(flat);
-        setRowOptions([...new Set(flat.map(d => d.row))]);
-        setColOptions([...new Set(flat.map(d => d.column))]);
+        setRowOptions([...new Set(flat.map((d) => d.row))]);
+        setColOptions([...new Set(flat.map((d) => d.column))]);
       })
-      .catch(() => message.error('Error fetching volume data'));
+      .catch(() => message.error("Error fetching volume data"));
   };
 
   // update dropdown
@@ -58,11 +67,18 @@ export default function FilterData() {
     const updated = [...streamDropdowns];
     updated[levelIndex].selected = selectedId;
     updated.splice(levelIndex + 1);
-    const children = contentHierarchy.filter(n => n.parent_id === parseInt(selectedId));
-    if (children.length) updated.push({ level: levelIndex + 1, options: children, selected: null });
+    const children = contentHierarchy.filter(
+      (n) => n.parent_id === parseInt(selectedId)
+    );
+    if (children.length)
+      updated.push({
+        level: levelIndex + 1,
+        options: children,
+        selected: null,
+      });
     setStreamDropdowns(updated);
 
-    const path = updated.map(d => d.selected).filter(Boolean);
+    const path = updated.map((d) => d.selected).filter(Boolean);
     setStreamSelection(path);
     setSelectedRowKeys([]);
     setSelectedRow(null);
@@ -82,25 +98,25 @@ export default function FilterData() {
 
   // dynamic columns
   const pivotColumns = useMemo(() => {
-    const cols = [{ title: 'Row', dataIndex: 'row', key: 'row' }];
-    colOptions.forEach(c => cols.push({ title: c, dataIndex: c, key: c }));
+    const cols = [{ title: "Row", dataIndex: "row", key: "row" }];
+    colOptions.forEach((c) => cols.push({ title: c, dataIndex: c, key: c }));
     return cols;
   }, [colOptions]);
 
   // filtered rows
   const filteredPivotData = useMemo(() => {
-    return pivotData.filter(r => !selectedRow || r.row === selectedRow);
+    return pivotData.filter((r) => !selectedRow || r.row === selectedRow);
   }, [pivotData, selectedRow]);
 
   // header
   const headerInfo = useMemo(() => {
     if (!volumeData.length) return null;
     // Convert comma-separated IDs to names
-    const ids = volumeData[0].stream.split(',');
+    const ids = volumeData[0].stream.split(",");
     const names = ids
-      .map(id => contentHierarchy.find(n => String(n.id) === id)?.name)
+      .map((id) => contentHierarchy.find((n) => String(n.id) === id)?.name)
       .filter(Boolean)
-      .join(' > ');
+      .join(" > ");
     const created_at = volumeData[0].created_at;
     return { stream: names, created_at };
   }, [volumeData, contentHierarchy]);
@@ -110,19 +126,26 @@ export default function FilterData() {
   const deleteSelected = async () => {
     if (!selectedRowKeys.length) return;
     try {
-      const cells = selectedRowKeys.flatMap(key => {
-        const [id, row] = key.split('||');
+      const cells = selectedRowKeys.flatMap((key) => {
+        const [id, row] = key.split("||");
         return volumeData
-          .filter(d => d.id.toString() === id && d.row === row)
-          .map(d => ({ id: d.id, row: d.row, column: d.column }));
+          .filter((d) => d.id.toString() === id && d.row === row)
+          .map((d) => ({ id: d.id, row: d.row, column: d.column }));
       });
-      const res = await fetch('/api/volumeData', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cells }) });
+      const res = await fetch("/api/volumeData", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json" ,
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`
+        },
+        body: JSON.stringify({ cells }),
+      });
       if (!res.ok) throw new Error();
-      message.success('Deleted successfully');
+      message.success("Deleted successfully");
       setSelectedRowKeys([]);
       fetchAndFlatten(streamSelection);
     } catch {
-      message.error('Delete failed');
+      message.error("Delete failed");
     }
   };
 
@@ -135,8 +158,11 @@ export default function FilterData() {
             key={i}
             placeholder={`Level ${i + 1}`}
             value={dd.selected}
-            onChange={val => updateStreamDropdown(val, i)}
-            options={dd.options.map(o => ({ label: o.name, value: o.id.toString() }))}
+            onChange={(val) => updateStreamDropdown(val, i)}
+            options={dd.options.map((o) => ({
+              label: o.name,
+              value: o.id.toString(),
+            }))}
             style={{ width: 250, marginRight: 8, marginBottom: 8 }}
           />
         ))}
@@ -144,8 +170,12 @@ export default function FilterData() {
 
       {headerInfo && (
         <Descriptions size="small" column={2} style={{ marginBottom: 16 }}>
-          <Descriptions.Item label="Stream">{headerInfo.stream}</Descriptions.Item>
-          <Descriptions.Item label="Created At">{headerInfo.created_at}</Descriptions.Item>
+          <Descriptions.Item label="Stream">
+            {headerInfo.stream}
+          </Descriptions.Item>
+          <Descriptions.Item label="Created At">
+            {headerInfo.created_at}
+          </Descriptions.Item>
         </Descriptions>
       )}
 
@@ -153,7 +183,7 @@ export default function FilterData() {
         <Select
           placeholder="Filter by Row"
           style={{ width: 200, marginBottom: 16 }}
-          options={rowOptions.map(r => ({ label: r, value: r }))}
+          options={rowOptions.map((r) => ({ label: r, value: r }))}
           allowClear
           value={selectedRow}
           onChange={setSelectedRow}
@@ -161,20 +191,30 @@ export default function FilterData() {
       )}
 
       <div style={{ marginBottom: 16 }}>
-        <Button type="primary" danger onClick={deleteSelected} disabled={!selectedRowKeys.length}>
+        <Button
+          type="primary"
+          danger
+          onClick={deleteSelected}
+          disabled={!selectedRowKeys.length}
+        >
           Delete Selected
         </Button>
         {selectedRowKeys.length > 0 && (
-          <span style={{ marginLeft: 8 }}>{selectedRowKeys.length} row(s) selected</span>
+          <span style={{ marginLeft: 8 }}>
+            {selectedRowKeys.length} row(s) selected
+          </span>
         )}
       </div>
 
       <Table
-        rowSelection={{ type: 'checkbox', ...rowSelection }}
-        dataSource={filteredPivotData.map(r => ({ ...r, key: `${volumeData.find(d => d.row===r.row).id}||${r.row}` }))}
+        rowSelection={{ type: "checkbox", ...rowSelection }}
+        dataSource={filteredPivotData.map((r) => ({
+          ...r,
+          key: `${volumeData.find((d) => d.row === r.row).id}||${r.row}`,
+        }))}
         columns={pivotColumns}
         pagination={false}
-        scroll={{ x: 'max-content', y: 400 }}
+        scroll={{ x: "max-content", y: 400 }}
       />
     </>
   );

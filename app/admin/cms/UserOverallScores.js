@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { Collapse, Typography, Spin, Alert, Table } from 'antd';
 import SubmissionYearlyScores from './SubmissionYearlyScores';
-import { useAverageYearlyScores } from '../hooks/useAverageYearlyScores';
+import { useAverageYearlyScores } from '../../hooks/useAverageYearlyScores';
 
 const { Title, Text } = Typography;
 const { Panel } = Collapse;
@@ -22,9 +22,21 @@ export default function UserOverallScores() {
     async function loadAll() {
       try {
         const [subRes, qRes, sRes] = await Promise.all([
-          fetch('/api/saveScores'),
-          fetch('/api/questions'),
-          fetch('/api/scoreSettings'),
+          fetch('/api/saveScores', {
+            headers: {
+              Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`, 
+            },
+          }),
+          fetch('/api/questions', {
+            headers: {
+              Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`, 
+            },
+          }),
+          fetch('/api/scoreSettings', {
+            headers: {
+              Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`, 
+            },
+          }),
         ]);
         if (!subRes.ok) throw new Error('Failed to fetch submissions');
         if (!qRes.ok)   throw new Error('Failed to fetch questions');

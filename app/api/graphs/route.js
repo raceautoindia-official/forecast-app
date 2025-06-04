@@ -24,8 +24,8 @@ export async function POST(req) {
     const { name, datasetIds, forecastTypes, chartType } = await req.json();
     if (
       !name ||
-      !Array.isArray(datasetIds) ||
-      !datasetIds.length ||
+      !datasetIds ||
+      // !datasetIds.length ||
       // !Array.isArray(forecastTypes) ||
       // !forecastTypes.length ||
       !chartType

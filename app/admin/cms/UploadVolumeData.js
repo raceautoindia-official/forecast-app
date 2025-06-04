@@ -22,7 +22,11 @@ export default function UploadVolumeData() {
   const [templateDownloading, setTemplateDownloading] = useState(false);
 
   useEffect(() => {
-    fetch('/api/formatHierarchy')
+    fetch('/api/formatHierarchy', {
+            headers: {
+              Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`, 
+            },
+          })
       .then((res) => res.json())
       .then((data) => {
         setHierarchyNodes(data);
@@ -30,7 +34,11 @@ export default function UploadVolumeData() {
         setFormatCharts(rootCharts);
       });
 
-    fetch('/api/contentHierarchy')
+    fetch('/api/contentHierarchy', {
+            headers: {
+              Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`, 
+            },
+          })
       .then((res) => res.json())
       .then(data => {
         setContentHierarchy(data);
@@ -105,7 +113,10 @@ export default function UploadVolumeData() {
       setTemplateDownloading(true);
       const res = await fetch('/api/generateExcelTemplate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          "Content-Type": "application/json" ,
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`
+        },
         body: JSON.stringify({
           rowChartId: rowChart,
           rowLevelNodes: selectedRowLevel.nodeIds,
@@ -150,6 +161,9 @@ export default function UploadVolumeData() {
     const res = await fetch('/api/uploadVolumeData', {
       method: 'POST',
       body: formData,
+      headers: {
+            Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`
+          }
     });
 
     if (res.ok) {

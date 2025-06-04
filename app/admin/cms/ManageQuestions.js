@@ -29,7 +29,11 @@ export default function ManageQuestions() {
   const fetchQuestions = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/questions');
+      const res = await fetch('/api/questions', {
+            headers: {
+              Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`, 
+            },
+          });
       const data = await res.json();
       setQuestions(data);
     } catch {
@@ -47,7 +51,10 @@ export default function ManageQuestions() {
     try {
       await fetch('/api/questions', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+         headers: {
+          "Content-Type": "application/json" ,
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`
+        },
         body: JSON.stringify(values)
       });
       message.success('Question added');
@@ -62,7 +69,10 @@ export default function ManageQuestions() {
     try {
       await fetch('/api/questions', {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+         headers: {
+          "Content-Type": "application/json" ,
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`
+        },
         body: JSON.stringify({ id })
       });
       message.success('Deleted');

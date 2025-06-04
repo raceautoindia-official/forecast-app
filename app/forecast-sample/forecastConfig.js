@@ -2,409 +2,966 @@
 
 // ─── 1) Regions & Groups ─────────────────────────────────────────
 export const allRegions = [
-  'PERU','ASEAN','CHILE','CHINA','EGYPT','INDIA','ITALY','JAPAN','SPAIN',
-  'BRAZIL','CANADA','FRANCE','GREECE','ISRAEL','KUWAIT','MEXICO','NORWAY',
-  'POLAND','RUSSIA','SWEDEN','TAIWAN','TURKEY','AUSTRIA','BELGIUM','CROATIA',
-  'DENMARK','ECUADOR','FINLAND','GERMANY','HUNGARY','IRELAND','MOROCCO',
-  'ROMANIA','UKRAINE','VIETNAM','BULGARIA','COLOMBIA','MALAYSIA','PAKISTAN',
-  'PORTUGAL','SLOVAKIA','THAILAND','ARGENTINA','AUSTRALIA','INDONESIA',
-  'KAZAKHSTAN','UZBEKIZTAN','NETHERLANDS','NEW ZEALAND','PHILIPPINES',
-  'PUERTO RICO','SOUTH KOREA','SWITZERLAND','SAUDI ARABIA','SOUTH AFRICA',
-  'CZECH REPUBLIC','UNITED KINGDOM','OTHER COUNTRIES ASIA',
-  'UNITED ARAB EMIRATES','OTHER COUNTRIES AFRICA',
-  'OTHER COUNTRIES EUROPE','OTHER COUNTRIES AMERICA',
-  'UNITED STATES OF AMERICA'
+  "PERU",
+  "ASEAN",
+  "CHILE",
+  "CHINA",
+  "EGYPT",
+  "INDIA",
+  "ITALY",
+  "JAPAN",
+  "SPAIN",
+  "BRAZIL",
+  "CANADA",
+  "FRANCE",
+  "GREECE",
+  "ISRAEL",
+  "KUWAIT",
+  "MEXICO",
+  "NORWAY",
+  "POLAND",
+  "RUSSIA",
+  "SWEDEN",
+  "TAIWAN",
+  "TURKEY",
+  "AUSTRIA",
+  "BELGIUM",
+  "CROATIA",
+  "DENMARK",
+  "ECUADOR",
+  "FINLAND",
+  "GERMANY",
+  "HUNGARY",
+  "IRELAND",
+  "MOROCCO",
+  "ROMANIA",
+  "UKRAINE",
+  "VIETNAM",
+  "BULGARIA",
+  "COLOMBIA",
+  "MALAYSIA",
+  "PAKISTAN",
+  "PORTUGAL",
+  "SLOVAKIA",
+  "THAILAND",
+  "ARGENTINA",
+  "AUSTRALIA",
+  "INDONESIA",
+  "KAZAKHSTAN",
+  "UZBEKIZTAN",
+  "NETHERLANDS",
+  "NEW ZEALAND",
+  "PHILIPPINES",
+  "PUERTO RICO",
+  "SOUTH KOREA",
+  "SWITZERLAND",
+  "SAUDI ARABIA",
+  "SOUTH AFRICA",
+  "CZECH REPUBLIC",
+  "UNITED KINGDOM",
+  "OTHER COUNTRIES ASIA",
+  "UNITED ARAB EMIRATES",
+  "OTHER COUNTRIES AFRICA",
+  "OTHER COUNTRIES EUROPE",
+  "OTHER COUNTRIES AMERICA",
+  "UNITED STATES OF AMERICA",
 ];
 
 export const regionGroups = {
   Americas: [
-    'PERU','CHILE','BRAZIL','CANADA','MEXICO','UNITED STATES OF AMERICA',
-    'ARGENTINA','COLOMBIA','PUERTO RICO','ECUADOR','OTHER COUNTRIES AMERICA'
+    "PERU",
+    "CHILE",
+    "BRAZIL",
+    "CANADA",
+    "MEXICO",
+    "UNITED STATES OF AMERICA",
+    "ARGENTINA",
+    "COLOMBIA",
+    "PUERTO RICO",
+    "ECUADOR",
+    "OTHER COUNTRIES AMERICA",
   ],
   Europe: [
-    'FRANCE','GREECE','ITALY','SPAIN','NORWAY','POLAND','RUSSIA','SWEDEN',
-    'AUSTRIA','BELGIUM','BULGARIA','CROATIA','CZECH REPUBLIC','DENMARK',
-    'FINLAND','GERMANY','HUNGARY','IRELAND','NETHERLANDS','PORTUGAL',
-    'ROMANIA','SLOVAKIA','SWITZERLAND','UKRAINE','UNITED KINGDOM',
-    'OTHER COUNTRIES EUROPE'
+    "FRANCE",
+    "GREECE",
+    "ITALY",
+    "SPAIN",
+    "NORWAY",
+    "POLAND",
+    "RUSSIA",
+    "SWEDEN",
+    "AUSTRIA",
+    "BELGIUM",
+    "BULGARIA",
+    "CROATIA",
+    "CZECH REPUBLIC",
+    "DENMARK",
+    "FINLAND",
+    "GERMANY",
+    "HUNGARY",
+    "IRELAND",
+    "NETHERLANDS",
+    "PORTUGAL",
+    "ROMANIA",
+    "SLOVAKIA",
+    "SWITZERLAND",
+    "UKRAINE",
+    "UNITED KINGDOM",
+    "OTHER COUNTRIES EUROPE",
   ],
   Asia: [
-    'ASEAN','CHINA','INDIA','JAPAN','TAIWAN','TURKEY','ISRAEL','KUWAIT',
-    'MALAYSIA','PAKISTAN','THAILAND','VIETNAM','PHILIPPINES','INDONESIA',
-    'KAZAKHSTAN','UZBEKIZTAN','SAUDI ARABIA','UNITED ARAB EMIRATES',
-    'SOUTH KOREA','OTHER COUNTRIES ASIA'
+    "ASEAN",
+    "CHINA",
+    "INDIA",
+    "JAPAN",
+    "TAIWAN",
+    "TURKEY",
+    "ISRAEL",
+    "KUWAIT",
+    "MALAYSIA",
+    "PAKISTAN",
+    "THAILAND",
+    "VIETNAM",
+    "PHILIPPINES",
+    "INDONESIA",
+    "KAZAKHSTAN",
+    "UZBEKIZTAN",
+    "SAUDI ARABIA",
+    "UNITED ARAB EMIRATES",
+    "SOUTH KOREA",
+    "OTHER COUNTRIES ASIA",
   ],
-  Africa: [
-    'EGYPT','MOROCCO','SOUTH AFRICA','OTHER COUNTRIES AFRICA'
-  ],
-  Oceania: [
-    'AUSTRALIA','NEW ZEALAND'
-  ]
+  Africa: ["EGYPT", "MOROCCO", "SOUTH AFRICA", "OTHER COUNTRIES AFRICA"],
+  Oceania: ["AUSTRALIA", "NEW ZEALAND"],
 };
 
 // ─── 2) Dataset Definitions ────────────────────────────────────────
 export const datasets = [
   {
-    id: 'd1',
-    label: 'Trucks',
+    id: "d0",
+    label: "Commercial Vehicles",
     regions: allRegions,
-    graphIds: ['g1']
+    graphIds: ["g1"],
   },
   {
-    id: 'd2',
-    label: 'Buses & Coaches',
+    id: "d1",
+    label: "Passenger Car",
     regions: allRegions,
-    graphIds: ['g2']
+    graphIds: ["g1"],
   },
   {
-    id: 'd3',
-    label: 'Passenger Car',
+    id: "d2",
+    label: "Buses & Coaches",
     regions: allRegions,
-    graphIds: ['g3']
+    graphIds: ["g2"],
   },
   {
-    id: 'd4',
-    label: 'Tractor Trailers',
+    id: "d3",
+    label: "Trucks",
     regions: allRegions,
-    graphIds: ['g1']
+    graphIds: ["g3"],
   },
   {
-    id: 'd5',
-    label: 'Agri Tractors',
+    id: "d4",
+    label: "Tractor Trailers",
     regions: allRegions,
-    graphIds: ['g1']
+    graphIds: ["g1"],
   },
   {
-    id: 'd6',
-    label: 'Mining Equipments',
+    id: "d5",
+    label: "Agri Tractors",
     regions: allRegions,
-    graphIds: ['g1']
+    graphIds: ["g1"],
   },
   {
-    id: 'd7',
-    label: 'Engines',
+    id: "d6",
+    label: "Mining Equipments",
     regions: allRegions,
-    graphIds: ['g1']
+    graphIds: ["g1"],
+  },
+  // {
+  //   id: "d7",
+  //   label: "Engines",
+  //   regions: allRegions,
+  //   graphIds: ["g1"],
+  // },
+  {
+    id: "d7",
+    label: "Motorcycles",
+    regions: allRegions,
+    graphIds: ["g1"],
   },
   {
-    id: 'd8',
-    label: 'Motorcycles',
+    id: "d8",
+    label: "Trio - Motorised Three Wheelers",
     regions: allRegions,
-    graphIds: ['g1']
+    graphIds: ["g1"],
   },
   {
-    id: 'd9',
-    label: 'Trio - Motorised Three Wheelers',
+    id: "d9",
+    label: "Components and Accessories",
     regions: allRegions,
-    graphIds: ['g1']
+    graphIds: ["g1"],
   },
-  {
-    id: 'd10',
-    label: 'Components and Accessories',
-    regions: allRegions,
-    graphIds: ['g1']
-  },
-  
 ];
 
 // Quick lookup
 export const datasetMap = Object.fromEntries(
-  datasets.map(ds => [
+  datasets.map((ds) => [
     ds.id,
-    { label: ds.label, regions: ds.regions, graphIds: ds.graphIds }
+    { label: ds.label, regions: ds.regions, graphIds: ds.graphIds },
   ])
 );
 
 // ─── 3) Chart Definitions ─────────────────────────────────────────
 export const graphs = [
   {
-    id: 'g1',
-    name: 'Overall Truck sales Trend Analysis',
-    forecast_types: ['linear','score','ai','raceInsights'],
-    dataset_ids: ['d1']
+    id: "g0",
+    name: "Overall Commercial Vehicle Sales Trend Analysis",
+    forecast_types: ["linear", "score", "ai", "raceInsights"],
+    dataset_ids: ["d0"],
   },
   {
-    id: 'g2',
+    id: "g1",
+    name: "Overall Truck sales Trend Analysis",
+    forecast_types: ["linear", "score", "ai", "raceInsights"],
+    dataset_ids: ["d3"],
+  },
+  {
+    id: "g2",
     name: `Overall Production Trend Analysis`,
-    forecast_types: ['linear','ai','raceInsights'],
-    dataset_ids: ['d1']
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d3"],
   },
   {
-    id: 'g3',
+    id: "g3",
     name: `Overall Exports Sales Trend Analysis`,
-    forecast_types: ['linear','ai','raceInsights'],
-    dataset_ids: ['d1']
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d3"],
   },
   {
-    id: 'g4',
-    name: 'Segment LCV Sales Trend Analysis',
-    forecast_types: ['linear','ai','raceInsights'],
-    dataset_ids: ['d1']
+    id: "g4",
+    name: "Segment LCV Sales Trend Analysis",
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d3"],
   },
   {
-    id: 'g5',
-    name: 'Segment MCV Sales Trend Analysis',
-    forecast_types: ['linear','score','ai','raceInsights'],
-    dataset_ids: ['d1']
+    id: "g5",
+    name: "Segment MCV Sales Trend Analysis",
+    forecast_types: ["linear", "score", "ai", "raceInsights"],
+    dataset_ids: ["d3"],
   },
   {
-    id: 'g6',
-    name: 'Segment HCV Sales Trend Analysis',
-    forecast_types: ['linear','ai','raceInsights'],
-    dataset_ids: ['d1']
-  },
-   {
-    id: 'g7',
-    name: 'Segment LCV Production Trend Analysis',
-    forecast_types: ['linear','ai','raceInsights'],
-    dataset_ids: ['d1']
+    id: "g6",
+    name: "Segment HCV Sales Trend Analysis",
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d3"],
   },
   {
-    id: 'g8',
-    name: 'Segment MCV Production Trend Analysis',
-    forecast_types: ['linear','score','ai','raceInsights'],
-    dataset_ids: ['d1']
+    id: "g7",
+    name: "Segment LCV Production Trend Analysis",
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d3"],
   },
   {
-    id: 'g9',
-    name: 'Segment HCV Production Trend Analysis',
-    forecast_types: ['linear','ai','raceInsights'],
-    dataset_ids: ['d1']
+    id: "g8",
+    name: "Segment MCV Production Trend Analysis",
+    forecast_types: ["linear", "score", "ai", "raceInsights"],
+    dataset_ids: ["d3"],
   },
   {
-    id: 'g10',
-    name: 'Segmental Split Trend Analysis',
-    forecast_types: ['linear','score','ai','raceInsights'],
-    dataset_ids: ['d1']
+    id: "g9",
+    name: "Segment HCV Production Trend Analysis",
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d3"],
   },
   {
-    id: 'g11',
-    name: 'Application Split Trend Analysis',
-    forecast_types: ['linear','ai','raceInsights'],
-    dataset_ids: ['d1']
+    id: "g10",
+    name: "Segmental Split Trend Analysis",
+    forecast_types: ["linear", "score", "ai", "raceInsights"],
+    dataset_ids: ["d3"],
   },
   {
-    id: 'g12',
-    name: 'Alternative Fuel Penetration Trend Analysis',
-    forecast_types: ['score','raceInsights'],
-    dataset_ids: ['d1']
+    id: "g11",
+    name: "Application Split Trend Analysis",
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d3"],
   },
   {
-    id: 'g13',
+    id: "g12",
+    name: "Alternative Fuel Penetration Trend Analysis",
+    forecast_types: ["score", "raceInsights"],
+    dataset_ids: ["d3"],
+  },
+  {
+    id: "g13",
     name: `OEM's Market Share Trend Analysis`,
-    forecast_types: ['linear','ai','raceInsights'],
-    dataset_ids: ['d1']
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d3"],
   },
   {
-    id: 'g14',
+    id: "g14",
     name: `OEM Wise Revenue/Profit Trend Analysis`,
-    forecast_types: ['linear','ai','raceInsights'],
-    dataset_ids: ['d1']
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d3"],
   },
   {
-    id: 'g15',
+    id: "g15",
     name: `EV-Hybrid Trend Analysis`,
-    forecast_types: ['linear','ai','raceInsights'],
-    dataset_ids: ['d1']
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d3"],
   },
   {
-    id: 'g16',
+    id: "g16",
     name: `Transmission Trend Analysis`,
-    forecast_types: ['linear','ai','raceInsights'],
-    dataset_ids: ['d1']
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d3"],
   },
   {
-    id: 'g17',
+    id: "g17",
     name: `Vehicle Ageing Report Analysis`,
-    forecast_types: ['linear','ai','raceInsights'],
-    dataset_ids: ['d1']
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d3"],
   },
   {
-    id: 'g18',
-    name: 'Overall Bus sales Trend Analysis',
-    forecast_types: ['linear','score','ai','raceInsights'],
-    dataset_ids: ['d2']
+    id: "g18",
+    name: "Overall Bus sales Trend Analysis",
+    forecast_types: ["linear", "score", "ai", "raceInsights"],
+    dataset_ids: ["d2"],
   },
   {
-    id: 'g19',
+    id: "g19",
     name: `Overall Production Trend Analysis`,
-    forecast_types: ['linear','ai','raceInsights'],
-    dataset_ids: ['d2']
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d2"],
   },
   {
-    id: 'g20',
+    id: "g20",
     name: `Overall Exports Sales Trend Analysis`,
-    forecast_types: ['linear','ai','raceInsights'],
-    dataset_ids: ['d2']
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d2"],
   },
   {
-    id: 'g21',
-    name: 'Segment LD Sales Trend Analysis',
-    forecast_types: ['linear','ai','raceInsights'],
-    dataset_ids: ['d2']
+    id: "g21",
+    name: "Segment LD Sales Trend Analysis",
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d2"],
   },
   {
-    id: 'g22',
-    name: 'Segment MD Sales Trend Analysis',
-    forecast_types: ['linear','score','ai','raceInsights'],
-    dataset_ids: ['d2']
+    id: "g22",
+    name: "Segment MD Sales Trend Analysis",
+    forecast_types: ["linear", "score", "ai", "raceInsights"],
+    dataset_ids: ["d2"],
   },
   {
-    id: 'g23',
-    name: 'Segment HD Sales Trend Analysis',
-    forecast_types: ['linear','ai','raceInsights'],
-    dataset_ids: ['d2']
-  },
-   {
-    id: 'g24',
-    name: 'Segment LD Production Trend Analysis',
-    forecast_types: ['linear','ai','raceInsights'],
-    dataset_ids: ['d2']
+    id: "g23",
+    name: "Segment HD Sales Trend Analysis",
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d2"],
   },
   {
-    id: 'g25',
-    name: 'Segment MD Production Trend Analysis',
-    forecast_types: ['linear','score','ai','raceInsights'],
-    dataset_ids: ['d2']
+    id: "g24",
+    name: "Segment LD Production Trend Analysis",
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d2"],
   },
   {
-    id: 'g26',
-    name: 'Segment HD Production Trend Analysis',
-    forecast_types: ['linear','ai','raceInsights'],
-    dataset_ids: ['d2']
+    id: "g25",
+    name: "Segment MD Production Trend Analysis",
+    forecast_types: ["linear", "score", "ai", "raceInsights"],
+    dataset_ids: ["d2"],
   },
   {
-    id: 'g27',
-    name: 'Segmental Split Trend Analysis',
-    forecast_types: ['linear','score','ai','raceInsights'],
-    dataset_ids: ['d2']
+    id: "g26",
+    name: "Segment HD Production Trend Analysis",
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d2"],
   },
   {
-    id: 'g28',
-    name: 'Application Split Trend Analysis',
-    forecast_types: ['linear','ai','raceInsights'],
-    dataset_ids: ['d2']
+    id: "g27",
+    name: "Segmental Split Trend Analysis",
+    forecast_types: ["linear", "score", "ai", "raceInsights"],
+    dataset_ids: ["d2"],
   },
   {
-    id: 'g29',
-    name: 'Alternative Fuel Penetration Trend Analysis',
-    forecast_types: ['score','raceInsights'],
-    dataset_ids: ['d2']
+    id: "g28",
+    name: "Application Split Trend Analysis",
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d2"],
   },
   {
-    id: 'g30',
+    id: "g29",
+    name: "Alternative Fuel Penetration Trend Analysis",
+    forecast_types: ["score", "raceInsights"],
+    dataset_ids: ["d2"],
+  },
+  {
+    id: "g30",
     name: `OEM's Market Share Trend Analysis`,
-    forecast_types: ['linear','ai','raceInsights'],
-    dataset_ids: ['d2']
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d2"],
   },
   {
-    id: 'g31',
+    id: "g31",
     name: `OEM Wise Revenue/Profit Trend Analysis`,
-    forecast_types: ['linear','ai','raceInsights'],
-    dataset_ids: ['d2']
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d2"],
   },
   {
-    id: 'g32',
+    id: "g32",
     name: `EV-Hybrid Trend Analysis`,
-    forecast_types: ['linear','ai','raceInsights'],
-    dataset_ids: ['d2']
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d2"],
   },
   {
-    id: 'g33',
+    id: "g33",
     name: `Transmission Trend Analysis`,
-    forecast_types: ['linear','ai','raceInsights'],
-    dataset_ids: ['d2']
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d2"],
   },
   {
-    id: 'g34',
+    id: "g34",
     name: `Vehicle Ageing Report Analysis`,
-    forecast_types: ['linear','ai','raceInsights'],
-    dataset_ids: ['d2']
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d2"],
   },
   {
-    id: 'g35',
+    id: "g35",
     name: `Overall Passenger Vehicle sales Trend Analysis`,
-    forecast_types: ['linear','ai','raceInsights'],
-    dataset_ids: ['d3']
+    forecast_types: ["linear", "score", "ai", "raceInsights"],
+    dataset_ids: ["d1"],
   },
   {
-    id: 'g36',
+    id: "g36",
     name: `Overall Export Sales Trend analysis`,
-    forecast_types: ['linear','ai','raceInsights'],
-    dataset_ids: ['d3']
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d1"],
   },
-   {
-    id: 'g37',
+  {
+    id: "g37",
     name: `Overall Production Trend Analysis`,
-    forecast_types: ['linear','ai','raceInsights'],
-    dataset_ids: ['d3']
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d1"],
   },
-   {
-    id: 'g38',
+  {
+    id: "g38",
     name: `Segmental Split Trend Analysis`,
-    forecast_types: ['linear','ai','raceInsights'],
-    dataset_ids: ['d3']
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d1"],
   },
-   {
-    id: 'g39',
+  {
+    id: "g39",
     name: `Application Split Trend Analysis`,
-    forecast_types: ['linear','ai','raceInsights'],
-    dataset_ids: ['d3']
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d1"],
   },
-   {
-    id: 'g40',
+  {
+    id: "g40",
     name: `Transmission Trend Analysis`,
-    forecast_types: ['linear','ai','raceInsights'],
-    dataset_ids: ['d3']
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d1"],
   },
-   {
-    id: 'g41',
+  {
+    id: "g41",
     name: `Alternate Fuel Penetration Trend Analysis`,
-    forecast_types: ['linear','ai','raceInsights'],
-    dataset_ids: ['d3']
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d1"],
   },
-   {
-    id: 'g42',
+  {
+    id: "g42",
     name: `OEM's Market Share Trend Analysis`,
-    forecast_types: ['linear','ai','raceInsights'],
-    dataset_ids: ['d3']
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d1"],
   },
-   {
-    id: 'g43',
+  {
+    id: "g43",
     name: `EV/Hybrid Trend Analysis `,
-    forecast_types: ['linear','ai','raceInsights'],
-    dataset_ids: ['d3']
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d1"],
+  },
+  {
+    id: "g44",
+    name: `Competive Analysis - Vehicle Sales Pricing Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d1"],
+  },
+  {
+    id: "g45",
+    name: `Overall Tractor Sales Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d4"],
+  },
+  {
+    id: "g46",
+    name: `Overall Trailer Sales Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d4"],
+  },
+  {
+    id: "g47",
+    name: `Overall Tractor Production Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d4"],
+  },
+  {
+    id: "g48",
+    name: `Overall Trailer Production Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d4"],
+  },
+  {
+    id: "g49",
+    name: `Overall Tractor Export Sales Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d4"],
+  },
+  {
+    id: "g50",
+    name: `Overall Trailer Export Sales Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d4"],
+  },
+  {
+    id: "g51",
+    name: `Tractor Segmental Split Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d4"],
+  },
+  {
+    id: "g52",
+    name: `Trailer Segmental Split Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d4"],
+  },
+  {
+    id: "g53",
+    name: `Application Split Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d4"],
+  },
+  {
+    id: "g54",
+    name: `Alternate Fuel Penetration Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d4"],
+  },
+  {
+    id: "g55",
+    name: `OEM Market Share Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d4"],
+  },
+  {
+    id: "g56",
+    name: `OEM Wise Revenue/Profit Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d4"],
+  },
+  {
+    id: "g57",
+    name: `Ev-Hybrid Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d4"],
+  },
+  {
+    id: "g58",
+    name: `Transmission Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d4"],
+  },
+  {
+    id: "g59",
+    name: `Vehicle Ageing Report Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d4"],
+  },
+  {
+    id: "g60",
+    name: `Overall Tractor Sales Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d5"],
+  },
+  {
+    id: "g61",
+    name: `Overall Export Sales Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d5"],
+  },
+  {
+    id: "g62",
+    name: `Overall Tractor Production Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d5"],
+  },
+  {
+    id: "g63",
+    name: `Power Range Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d5"],
+  },
+  {
+    id: "g64",
+    name: `Alternate Fuel Penetration Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d5"],
+  },
+  {
+    id: "g65",
+    name: `EV Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d5"],
+  },
+  {
+    id: "g66",
+    name: `OEM's Marketshare Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d5"],
+  },
+  {
+    id: "g67",
+    name: `Competive Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d5"],
+  },
+  {
+    id: "g68",
+    name: `Vehicle Ageing Report Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d5"],
+  },
+  {
+    id: "g69",
+    name: `Overall Sales Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d6"],
+  },
+  {
+    id: "g70",
+    name: `Overall Export Sales Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d6"],
   },
    {
-    id: 'g44',
-    name: `Competive Analysis - Vehicle Sales Pricing Trend Analysis`,
-    forecast_types: ['linear','ai','raceInsights'],
-    dataset_ids: ['d3']
+    id: "g71",
+    name: `Overall Production Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d6"],
   },
-  
+   {
+    id: "g72",
+    name: `Segmental Split Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d6"],
+  },
+   {
+    id: "g73",
+    name: `Application Split Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d6"],
+  },
+   {
+    id: "g74",
+    name: `H.P Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d6"],
+  },
+   {
+    id: "g75",
+    name: `Revenue & Profit(OEM Wise) Trend Analysis `,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d6"],
+  },
+  {
+    id: "g76",
+    name: `Overall Motorcycle sales Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d7"],
+  },
+  {
+    id: "g77",
+    name: `Overall Export Sales Trend analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d7"],
+  },
+  {
+    id: "g78",
+    name: `Overall Production Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d7"],
+  },
+  {
+    id: "g79",
+    name: `Segmental Split Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d7"],
+  },
+  {
+    id: "g80",
+    name: `Application Split Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d7"],
+  },
+  {
+    id: "g81",
+    name: `Alternate Fuel Penetration Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d7"],
+  },
+  {
+    id: "g82",
+    name: `OEM's Market Share Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d7"],
+  },
+  {
+    id: "g83",
+    name: `EV/Hybrid Trend Analysis `,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d7"],
+  },
+  {
+    id: "g84",
+    name: `Competive Analysis - Vehicle Sales Pricing Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d7"],
+  },
+  {
+    id: "g85",
+    name: `Overall Trio sales Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d8"],
+  },
+  {
+    id: "g86",
+    name: `Overall Export Sales Trend analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d8"],
+  },
+  {
+    id: "g87",
+    name: `Overall Production Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d8"],
+  },
+  {
+    id: "g88",
+    name: `Segmental Split Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d8"],
+  },
+  {
+    id: "g89",
+    name: `Application Split Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d8"],
+  },
+  {
+    id: "g90",
+    name: `Alternate Fuel Penetration Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d8"],
+  },
+  {
+    id: "g91",
+    name: `OEM's Market Share Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d8"],
+  },
+  {
+    id: "g92",
+    name: `EV/Hybrid Trend Analysis `,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d8"],
+  },
+  {
+    id: "g93",
+    name: `Competive Analysis - Vehicle Sales Pricing Trend Analysis`,
+    forecast_types: ["linear", "ai", "raceInsights"],
+    dataset_ids: ["d8"],
+  },
+
 ];
 
 // ─── 4) Data for charts ────────────────────────────────────────────
 export const bothDataMap = {
-  g1: [
-    { year: 2020, value: 180, forecastLinear: 180, forecastScore: 180, forecastAi: 185, forecastRaceInsights: 175 },
-    { year: 2021, value: 215, forecastLinear: 220, forecastScore: 210, forecastAi: 225, forecastRaceInsights: 205 },
-    { year: 2022, value: 250, forecastLinear: 260, forecastScore: 240, forecastAi: 270, forecastRaceInsights: 245 },
-    { year: 2023, value: null, forecastLinear: 300, forecastScore: 280, forecastAi: 320, forecastRaceInsights: 290 },
-    { year: 2024, value: null, forecastLinear: 350, forecastScore: 330, forecastAi: 380, forecastRaceInsights: 340 }
+  g0:[
+    {
+      year: 2019,
+      value: 27261838,
+      forecastLinear: null,
+      forecastScore: null,
+      forecastAi: null,
+      forecastRaceInsights: null
+    },
+    {
+      year: 2020,
+      value: 24926519,
+      forecastLinear: null,
+      forecastScore: null,
+      forecastAi: null,
+      forecastRaceInsights: null
+    },
+    {
+      year: 2021,
+      value: 26362380,
+      forecastLinear: null,
+      forecastScore: null,
+      forecastAi: null,
+      forecastRaceInsights: null
+    },
+    {
+      year: 2022,
+      value: 24244246,
+      forecastLinear: null,
+      forecastScore: null,
+      forecastAi: null,
+      forecastRaceInsights: null
+    },
+    {
+      year: 2023,
+      value: 27772649,
+      forecastLinear: null,
+      forecastScore: null,
+      forecastAi: null,
+      forecastRaceInsights: null
+    },
+    {
+      year: 2024,
+      value: 28451080,
+      forecastLinear: 28451080,
+      forecastScore: 28451080,
+      forecastAi: 28451080,
+      forecastRaceInsights:28451080
+    },
+    {
+      year: 2025,
+      value: null,
+      forecastLinear: 27866693,
+      forecastScore: 28471493,
+      forecastAi: 28424027,
+      forecastRaceInsights: 27902093
+    },
+    {
+      year: 2026,
+      value: null,
+      forecastLinear: 28047494,
+      forecastScore: 28492717,
+      forecastAi: 28608484,
+      forecastRaceInsights: 27922873
+    },
+    {
+      year: 2027,
+      value: null,
+      forecastLinear: 28228296,
+      forecastScore: 28517144,
+      forecastAi: 28792862,
+      forecastRaceInsights: 27946801
+    },
+    {
+      year: 2028,
+      value: null,
+      forecastLinear: 28409097,
+      forecastScore: 28546481,
+      forecastAi: 28977279,
+      forecastRaceInsights: 27975551
+    },
+    {
+      year: 2029,
+      value: null,
+      forecastLinear: 28589899,
+      forecastScore: 28580047,
+      forecastAi: 29161697,
+      forecastRaceInsights: 28008446
+    }
   ],
-  g2: [
-    { year: 2020, value: 100, forecastLinear: 100, forecastScore: null, forecastAi: 110, forecastRaceInsights: null },
-    { year: 2021, value: 130, forecastLinear: 140, forecastScore: null, forecastAi: 150, forecastRaceInsights: null },
-    { year: 2022, value: 165, forecastLinear: 180, forecastScore: null, forecastAi: 200, forecastRaceInsights: null },
-    { year: 2023, value: null, forecastLinear: 200, forecastScore: null, forecastAi: 230, forecastRaceInsights: null },
-    { year: 2024, value: null, forecastLinear: 230, forecastScore: null, forecastAi: 265, forecastRaceInsights: null }
-  ],
-  g3: [
-    { year: 2020, value:   5, forecastLinear: null, forecastScore:   5, forecastAi: null, forecastRaceInsights: 4.8 },
-    { year: 2021, value: 4.5, forecastLinear: null, forecastScore: 4.2, forecastAi: null, forecastRaceInsights: 4.0 },
-    { year: 2022, value: 4.1, forecastLinear: null, forecastScore: 3.8, forecastAi: null, forecastRaceInsights: 3.6 },
-    { year: 2023, value: null, forecastLinear: null, forecastScore: 3.5, forecastAi: null, forecastRaceInsights: 3.3 },
-    { year: 2024, value: null, forecastLinear: null, forecastScore: 3.2, forecastAi: null, forecastRaceInsights: 3.0 }
-  ]
+  g35:[
+  {
+    year: 2019,
+    value: 64803420,
+    forecastLinear: null,
+    forecastScore: null,
+    forecastAi: null,
+    forecastRaceInsights: null
+  },
+  {
+    year: 2020,
+    value: 54742117,
+    forecastLinear: null,
+    forecastScore: null,
+    forecastAi: null,
+    forecastRaceInsights: null
+  },
+  {
+    year: 2021,
+    value: 58741536,
+    forecastLinear: null,
+    forecastScore: null,
+    forecastAi: null,
+    forecastRaceInsights: null
+  },
+  {
+    year: 2022,
+    value: 65412763,
+    forecastLinear: null,
+    forecastScore: null,
+    forecastAi: null,
+    forecastRaceInsights: null
+  },
+  {
+    year: 2023,
+    value: 67542081,
+    forecastLinear: null,
+    forecastScore: null,
+    forecastAi: null,
+    forecastRaceInsights: null
+  },
+  {
+    year: 2024,
+    value: 67533800,
+    forecastLinear: 67533800,
+    forecastScore: 67533800,
+    forecastAi: 67533800,
+    forecastRaceInsights: 67533800
+  },
+  {
+    year: 2025,
+    value: null,
+    forecastLinear: 68851976,
+    forecastScore: 69761770,
+    forecastAi: 70229016,
+    forecastRaceInsights: 68366535
+  },
+  {
+    year: 2026,
+    value: null,
+    forecastLinear: 71366411,
+    forecastScore: 72152999,
+    forecastAi: 72793740,
+    forecastRaceInsights: 70709939
+  },
+  {
+    year: 2027,
+    value: null,
+    forecastLinear: 73880846,
+    forecastScore: 74997171,
+    forecastAi: 75358464,
+    forecastRaceInsights: 73497228
+  },
+  {
+    year: 2028,
+    value: null,
+    forecastLinear: 76395282,
+    forecastScore: 78544714,
+    forecastAi: 77923188,
+    forecastRaceInsights: 76973820
+  },
+  {
+    year: 2029,
+    value: null,
+    forecastLinear: 78909717,
+    forecastScore: 82791360,
+    forecastAi: 80487912,
+    forecastRaceInsights: 81135533
+  }
+],
 };

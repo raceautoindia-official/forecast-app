@@ -3,7 +3,7 @@
 import React, { useMemo } from 'react';
 import { Table } from 'antd';
 // adjust path if needed:
-import { useYearlyScores } from '../hooks/YearlyScores';
+import { useYearlyScores } from '../../hooks/YearlyScores';
 
 export default function SubmissionYearlyScores({ submission }) {
   const {

@@ -59,12 +59,20 @@ export default function ForecastPage() {
 
   // 1) Fetch all needed data once
   useEffect(() => {
-    fetch('/api/graphs')
+    fetch('/api/graphs', {
+            headers: {
+              Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`, 
+            },
+          })
       .then(r => r.json())
       .then(setGraphs)
       .catch(console.error);
 
-    fetch('/api/volumeData')
+    fetch('/api/volumeData', {
+            headers: {
+              Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`, 
+            },
+          })
       .then(r => r.json())
       .then(arr => {
         const m = {};
@@ -91,7 +99,11 @@ export default function ForecastPage() {
 
 
 
-    fetch('/api/contentHierarchy')
+    fetch('/api/contentHierarchy', {
+            headers: {
+              Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`, 
+            },
+          })
       .then(r => r.json())
       .then(arr => {
         const m = {};
@@ -100,22 +112,42 @@ export default function ForecastPage() {
       })
       .catch(console.error);
 
-    fetch('/api/scoreSettings')
+    fetch('/api/scoreSettings', {
+            headers: {
+              Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`, 
+            },
+          })
       .then(r => r.json())
       .then(data => setScoreSettings(data))
       .catch(console.error);
     
     // now also fetch the format‐hierarchy tree
-    fetch('/api/formatHierarchy')
+    fetch('/api/formatHierarchy', {
+            headers: {
+              Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`, 
+            },
+          })
     .then(r => r.json())
     .then(setFormatHierarchy)
     .catch(console.error);
 
     // also pull in the submissions, questions & settings so we can compute averages
     Promise.all([
-        fetch('/api/saveScores'),
-        fetch('/api/questions'),
-        fetch('/api/scoreSettings')
+        fetch('/api/saveScores', {
+            headers: {
+              Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`, 
+            },
+          }),
+        fetch('/api/questions', {
+            headers: {
+              Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`, 
+            },
+          }),
+        fetch('/api/scoreSettings', {
+            headers: {
+              Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`, 
+            },
+          })
       ])
       .then(async ([subRes, qRes, sRes]) => {
         if (!subRes.ok || !qRes.ok || !sRes.ok) throw new Error();
@@ -357,6 +389,7 @@ export default function ForecastPage() {
   };
 
   // console.log("bothdata", bothData);
+  // console.log("data ", data);
 
  const PALETTE = [
     // Sapphire Blue (your --accent)
@@ -701,6 +734,7 @@ const abbreviate = v => {
                               : hasScore
                                 ? combinedDataScore
                                 : chartData;
+                          console.log("data " ,data);
 
                           return (
                             <LineChart

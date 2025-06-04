@@ -1,4 +1,6 @@
 // app/api/uploadVolumeData/route.js
+export const dynamic = "force-dynamic";
+
 import { IncomingForm } from 'formidable';
 import { Readable } from 'stream';
 import * as XLSX from 'xlsx';
@@ -6,11 +8,11 @@ import fs from 'fs';
 import path from 'path';
 import pool from '@/lib/db';
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+// export const config = {
+//   api: {
+//     bodyParser: false,
+//   },
+// };
 
 export async function POST(req) {
   try {

@@ -1,27 +1,41 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import { Table, Spin, Alert, Select, Button, Popconfirm, message, Row, Col } from 'antd';
+import React, { useEffect, useState } from "react";
+import {
+  Table,
+  Spin,
+  Alert,
+  Select,
+  Button,
+  Popconfirm,
+  message,
+  Row,
+  Col,
+} from "antd";
 
 export default function SubmittedScores() {
   const [submissions, setSubmissions] = useState([]);
-  const [loading,     setLoading]     = useState(true);
-  const [error,       setError]       = useState(null);
-  const [filterId,    setFilterId]    = useState(null);
-  const [deleting,    setDeleting]    = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [filterId, setFilterId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   // fetch all submissions
   const fetchData = () => {
     setLoading(true);
-    fetch('/api/saveScores')
-      .then(res => {
-        if (!res.ok) throw new Error('Network response was not ok');
+    fetch("/api/saveScores", {
+      headers: {
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`,
+      },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Network response was not ok");
         return res.json();
       })
-      .then(json => {
+      .then((json) => {
         setSubmissions(json.submissions);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err);
         setError(err.message);
       })
@@ -35,9 +49,12 @@ export default function SubmittedScores() {
     if (!filterId) return;
     setDeleting(true);
     try {
-      const res = await fetch('/api/saveScores', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/saveScores", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json" ,
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`
+        },
         body: JSON.stringify({ id: filterId }),
       });
       if (!res.ok) throw new Error(await res.text());
@@ -46,41 +63,45 @@ export default function SubmittedScores() {
       fetchData();
     } catch (err) {
       console.error(err);
-      message.error('Delete failed: ' + err.message);
+      message.error("Delete failed: " + err.message);
     } finally {
       setDeleting(false);
     }
   };
 
   if (loading) return <Spin tip="Loading submissions…" />;
-  if (error)   return <Alert message="Error" description={error} type="error" showIcon />;
+  if (error)
+    return <Alert message="Error" description={error} type="error" showIcon />;
 
   // build the list of distinct submission IDs for the filter dropdown
-  const submissionIds = Array.from(new Set(submissions.map(s => s.id)));
+  const submissionIds = Array.from(new Set(submissions.map((s) => s.id)));
 
   // flatten each (possibly filtered) submission into rows
   const rows = [];
   submissions
-    .filter(s => !filterId || s.id === filterId)
-    .forEach(sub => {
-      sub.scores.forEach(scoreEntry => {
+    .filter((s) => !filterId || s.id === filterId)
+    .forEach((sub) => {
+      sub.scores.forEach((scoreEntry) => {
         rows.push({
           key: `${sub.id}-${scoreEntry.questionId}-${scoreEntry.yearIndex}`,
           submissionId: sub.id,
           submittedAt: new Date(sub.createdAt).toLocaleString(),
           questionId: scoreEntry.questionId,
-          year: scoreEntry.yearIndex != null ? `Year ${scoreEntry.yearIndex + 1}` : '',
-          score: scoreEntry.skipped ? '⏭️ Skipped' : scoreEntry.score,
+          year:
+            scoreEntry.yearIndex != null
+              ? `Year ${scoreEntry.yearIndex + 1}`
+              : "",
+          score: scoreEntry.skipped ? "⏭️ Skipped" : scoreEntry.score,
         });
       });
     });
 
   const columns = [
-    { title: 'Submission ID', dataIndex: 'submissionId', key: 'submissionId' },
-    { title: 'When',          dataIndex: 'submittedAt',  key: 'submittedAt'  },
-    { title: 'Question ID',   dataIndex: 'questionId',   key: 'questionId'   },
-    { title: 'Year',          dataIndex: 'year',         key: 'year'         },
-    { title: 'Score',         dataIndex: 'score',        key: 'score'        },
+    { title: "Submission ID", dataIndex: "submissionId", key: "submissionId" },
+    { title: "When", dataIndex: "submittedAt", key: "submittedAt" },
+    { title: "Question ID", dataIndex: "questionId", key: "questionId" },
+    { title: "Year", dataIndex: "year", key: "year" },
+    { title: "Score", dataIndex: "score", key: "score" },
   ];
 
   return (
@@ -94,7 +115,7 @@ export default function SubmittedScores() {
             value={filterId}
             onChange={setFilterId}
           >
-            {submissionIds.map(id => (
+            {submissionIds.map((id) => (
               <Select.Option key={id} value={id}>
                 {id}
               </Select.Option>

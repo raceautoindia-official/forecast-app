@@ -22,12 +22,20 @@ export default function Table() {
   useEffect(() => {
     async function load() {
       // 1) fetch questions
-      const qRes  = await fetch('/api/questions');
+      const qRes  = await fetch('/api/questions', {
+            headers: {
+              Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`, 
+            },
+          });
       const qList = await qRes.json();
       console.log(qList);
   
       // 2) fetch settings
-      const sRes = await fetch('/api/scoreSettings');
+      const sRes = await fetch('/api/scoreSettings', {
+            headers: {
+              Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`, 
+            },
+          });
       const { yearNames, scoreLabels } = await sRes.json();
   
       // 3) now set ALL state at once
@@ -83,7 +91,10 @@ export default function Table() {
     });
     const res = await fetch('/api/saveScores', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+          "Content-Type": "application/json" ,
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`
+        },
       body: JSON.stringify({ results: payload })
     });
     if (res.ok) {

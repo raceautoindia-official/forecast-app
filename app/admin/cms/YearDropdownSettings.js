@@ -13,7 +13,11 @@ export default function YearDropdownSettings() {
   useEffect(() => {
     async function fetchSettings() {
       try {
-        const res = await fetch('/api/scoreSettings');
+        const res = await fetch('/api/scoreSettings', {
+            headers: {
+              Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`, 
+            },
+          });
         if (!res.ok) throw new Error(`${res.status}`);
         const data = await res.json();
         setYearNames(Array.isArray(data.yearNames) ? data.yearNames : []);
@@ -56,7 +60,10 @@ export default function YearDropdownSettings() {
     try {
       const res = await fetch('/api/scoreSettings', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          "Content-Type": "application/json" ,
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`
+        },
         body: JSON.stringify({ yearNames, scoreLabels }),
       });
       if (!res.ok) throw new Error(`${res.status}`);

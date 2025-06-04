@@ -13,10 +13,10 @@ import {
 } from "recharts";
 
 // Hook for linear regression forecast
-import { useLinearRegressionForecast } from "../hooks/LinearRegressionForecast";
+import { useLinearRegressionForecast } from "../../hooks/LinearRegressionForecast";
 // Hook for score based forecast
-import { useForecastGrowth }       from "../hooks/useForecastGrowth";
-import { useAverageYearlyScores }  from "../hooks/useAverageYearlyScores";
+import { useForecastGrowth }       from "../../hooks/useForecastGrowth";
+import { useAverageYearlyScores }  from "../../hooks/useAverageYearlyScores";
 
 export default function PreviewPage() {
   // --- UI state ---
