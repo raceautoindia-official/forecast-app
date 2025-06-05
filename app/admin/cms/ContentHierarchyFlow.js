@@ -13,7 +13,6 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
 } from "reactflow";
-
 import dagre from "dagre";
 import "reactflow/dist/style.css";
 import {
@@ -30,12 +29,9 @@ import {
   PlusOutlined,
   EditOutlined,
   ExclamationCircleOutlined,
+  CopyOutlined,
+  SnippetsOutlined,
 } from "@ant-design/icons";
-import { SnippetsOutlined } from "@ant-design/icons";
-
-import { CopyOutlined} from "@ant-design/icons";
-
-
 
 const { confirm } = Modal;
 const { Search } = Input;
@@ -43,7 +39,7 @@ const { Option } = Select;
 const nodeWidth = 172;
 const nodeHeight = 36;
 
-// Auto-layout with Dagre and styled nodes/edges
+// Auto‐layout with Dagre and styled nodes/edges
 const getLayoutedElements = (nodes, edges, direction = "TB") => {
   const graph = new dagre.graphlib.Graph();
   graph.setDefaultEdgeLabel(() => ({}));
@@ -84,42 +80,42 @@ const getLayoutedElements = (nodes, edges, direction = "TB") => {
 };
 
 export default function ContentHierarchyFlow() {
-  // raw nodes/edges
+  // raw nodes/edges from API:
   const [rawNodes, setRawNodes] = useState([]);
   const [rawEdges, setRawEdges] = useState([]);
 
-  // React Flow state
+  // React Flow state:
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
-  // selected node
+  // Selected node info:
   const [selectedNodeId, setSelectedNodeId] = useState(null);
   const [selectedNode, setSelectedNode] = useState(null);
 
-  // cascade dropdown state
+  // Cascade dropdown state:
   const [cascadeSelection, setCascadeSelection] = useState([]);
 
-  // modal/form state
+  // Add/rename modals:
   const [isAddModalVisible, setIsAddModalVisible] = useState(false);
   const [newNodeName, setNewNodeName] = useState("");
   const [parentId, setParentId] = useState(null);
   const [isRenameModalVisible, setIsRenameModalVisible] = useState(false);
   const [renameValue, setRenameValue] = useState("");
 
-  // UI state
+  // UI‐loading state:
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [modalLoading, setModalLoading] = useState(false);
 
-  // React Flow instance & wrapper
+  // React Flow instance & wrapper:
   const [rfInstance, setRfInstance] = useState(null);
   const reactFlowWrapper = useRef(null);
 
-  // “Clipboard” for copied subtree
+  // “Clipboard” for copied subtree:
   const [clipboardNodes, setClipboardNodes] = useState([]);
   const [copiedRootId, setCopiedRootId] = useState(null);
 
-  // fetch hierarchy once
+  // 1) Fetch hierarchy (rawNodes/rawEdges) once on mount:
   const fetchHierarchy = useCallback(() => {
     const controller = new AbortController();
     (async () => {
@@ -134,6 +130,8 @@ export default function ContentHierarchyFlow() {
         });
         if (!res.ok) throw new Error("Fetch failed");
         const data = await res.json();
+
+        // Build rawNodes/ rawEdges from API response:
         setRawNodes(
           data.map((n) => ({
             id: String(n.id),
@@ -163,7 +161,7 @@ export default function ContentHierarchyFlow() {
     fetchHierarchy();
   }, [fetchHierarchy]);
 
-  // layout computation
+  // 2) Compute Dagre‐layout whenever rawNodes/rawEdges change:
   const { nodes: layoutedNodes, edges: layoutedEdges } = useMemo(
     () => getLayoutedElements(rawNodes, rawEdges),
     [rawNodes, rawEdges]
@@ -173,7 +171,7 @@ export default function ContentHierarchyFlow() {
     setEdges(layoutedEdges);
   }, [layoutedNodes, layoutedEdges]);
 
-  // highlight the selected node
+  // 3) Highlight the selected node (yellow background) whenever selection changes:
   useEffect(() => {
     setNodes(
       layoutedNodes.map((node) => {
@@ -194,7 +192,7 @@ export default function ContentHierarchyFlow() {
     setEdges(layoutedEdges);
   }, [layoutedNodes, layoutedEdges, selectedNodeId]);
 
-  // build parent->children map
+  // 4) Build a parent→children map from rawNodes (to traverse descendants):
   const childrenMap = useMemo(
     () =>
       rawNodes.reduce((map, n) => {
@@ -205,7 +203,7 @@ export default function ContentHierarchyFlow() {
     [rawNodes]
   );
 
-  // Helper: collect all descendants of a given rootId (excluding root itself)
+  // Helper: collect **all descendants** of a given nodeId (excluding the root itself)
   const collectDescendants = useCallback(
     (rootId) => {
       const result = [];
@@ -214,11 +212,10 @@ export default function ContentHierarchyFlow() {
       while (queue.length) {
         const node = queue.shift();
         result.push({
-          oldId: node.id,
-          name: node.data.label,
+          id: node.id,
           parent: node.parent_id,
+          name: node.data.label,
         });
-        // enqueue this node’s children
         const kids = childrenMap[String(node.id)] || [];
         queue.push(...kids);
       }
@@ -227,7 +224,7 @@ export default function ContentHierarchyFlow() {
     [childrenMap]
   );
 
-  // focus on node (top-center)
+  // 5) Center & zoom to a given node on click/search:
   const focusNode = useCallback(
     (id) => {
       const node = layoutedNodes.find((n) => n.id === id);
@@ -244,7 +241,7 @@ export default function ContentHierarchyFlow() {
     [layoutedNodes, rfInstance]
   );
 
-  // cascade dropdown handler
+  // 6) When a dropdown level is changed, update cascade selection & focus:
   const handleLevelSelect = useCallback(
     (level, id) => {
       setCascadeSelection((prev) => {
@@ -257,7 +254,7 @@ export default function ContentHierarchyFlow() {
     [focusNode]
   );
 
-  // node operations
+  // 7) Add a new node under parentId:
   const onAddNode = useCallback(async () => {
     if (!newNodeName.trim()) return message.error("Enter node name");
     setModalLoading(true);
@@ -282,6 +279,7 @@ export default function ContentHierarchyFlow() {
     }
   }, [newNodeName, parentId, fetchHierarchy]);
 
+  // 8) Delete a single selected node:
   const deleteNode = useCallback(async () => {
     if (!selectedNodeId) return message.error("Select a node first");
     setModalLoading(true);
@@ -306,6 +304,7 @@ export default function ContentHierarchyFlow() {
     }
   }, [selectedNodeId, fetchHierarchy]);
 
+  // 9) Rename a node:
   const renameNode = useCallback(async () => {
     if (!renameValue.trim()) return message.error("Enter new name");
     setModalLoading(true);
@@ -329,7 +328,7 @@ export default function ContentHierarchyFlow() {
     }
   }, [renameValue, selectedNodeId, fetchHierarchy]);
 
-  // Copy handler: store selectedNodeId’s descendants in clipboard
+  // 10) Copy subtree descendants into “clipboard”
   const handleCopy = () => {
     if (!selectedNodeId) {
       message.error("Select a node first to copy its subtree.");
@@ -345,7 +344,7 @@ export default function ContentHierarchyFlow() {
     message.success(`Copied ${descendants.length} descendant nodes.`);
   };
 
-  // Paste handler: re-create clipboardNodes under selectedNodeId
+  // 11) Paste those copied descendants under the newly selected node
   const handlePaste = useCallback(async () => {
     if (!selectedNodeId) {
       message.error("Select a node to paste into.");
@@ -356,15 +355,16 @@ export default function ContentHierarchyFlow() {
       return;
     }
 
+    // We'll track oldId → newId mapping so children attach correctly
     const newIdMap = {};
     try {
       for (const item of clipboardNodes) {
         let newParentId;
-        // If item’s old parent was the copied root, attach under the new target
         if (String(item.parent) === String(copiedRootId)) {
+          // If its old parent was the copied root, attach it under the new target
           newParentId = Number(selectedNodeId);
         } else {
-          // Otherwise, find the newly created ID of its old parent
+          // Otherwise look up the newly created ID of its old parent
           newParentId = newIdMap[item.parent];
         }
 
@@ -376,7 +376,7 @@ export default function ContentHierarchyFlow() {
           },
           body: JSON.stringify({
             parent_id: newParentId,
-            name: item.name,
+            name:      item.name,
           }),
         });
         if (!res.ok) {
@@ -384,7 +384,7 @@ export default function ContentHierarchyFlow() {
           throw new Error(err.error || "Failed to insert node");
         }
         const created = await res.json();
-        newIdMap[item.oldId] = created.id;
+        newIdMap[item.id] = created.id;
       }
 
       message.success("Subtree pasted successfully.");
@@ -397,7 +397,56 @@ export default function ContentHierarchyFlow() {
     }
   }, [clipboardNodes, copiedRootId, selectedNodeId, fetchHierarchy]);
 
-  // search handler
+  // 12) **New**: Recursively delete all descendants of the selected node (but not the node itself):
+  const handleDeleteDescendants = useCallback(() => {
+    if (!selectedNodeId) {
+      message.error("Select a node first to delete its descendants.");
+      return;
+    }
+    confirm({
+      title: "Delete all descendants?",
+      icon: <ExclamationCircleOutlined />,
+      content:
+        "This will remove all child nodes (and their children) under the selected node. This cannot be undone.",
+      onOk: async () => {
+        try {
+          // Recursive function: delete from leaves up
+          const deleteSubtree = async (nodeId) => {
+            const kids = childrenMap[String(nodeId)] || [];
+            // First delete all children recursively
+            for (const kid of kids) {
+              await deleteSubtree(kid.id);
+            }
+            // Then delete this node itself
+            await fetch("/api/contentHierarchy", {
+              method: "DELETE",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`,
+              },
+              body: JSON.stringify({ id: Number(nodeId) }),
+            });
+          };
+
+          // Gather direct children of selectedNodeId, then delete each subtree
+          const directKids = childrenMap[String(selectedNodeId)] || [];
+          for (const child of directKids) {
+            await deleteSubtree(child.id);
+          }
+
+          message.success("All descendants deleted.");
+          setSelectedNodeId(null);
+          setSelectedNode(null);
+          fetchHierarchy();
+        } catch (e) {
+          console.error(e);
+          message.error("Failed to delete descendants: " + e.message);
+        }
+      },
+    });
+  }, [selectedNodeId, childrenMap, fetchHierarchy]);
+
+  // 13) Search handler:
   const onSearchNode = useCallback(
     (val) => {
       const found = rawNodes.find((n) =>
@@ -408,12 +457,12 @@ export default function ContentHierarchyFlow() {
     [rawNodes, focusNode]
   );
 
-  // loading / error
+  // 14) Show loading spinner / error if needed:
   if (loading)
     return <Spin tip="Loading..." style={{ width: "100%", marginTop: 20 }} />;
   if (error) return <Empty description={error} style={{ marginTop: 20 }} />;
 
-  // build cascade dropdowns
+  // 15) Build cascade dropdowns at the top:
   const dropdowns = [];
   let parent = "root";
   for (let lvl = 0; ; lvl++) {
@@ -450,6 +499,7 @@ export default function ContentHierarchyFlow() {
         background: "#f9f9f9",
       }}
     >
+      {/* Toolbar */}
       <div
         style={{
           padding: 12,
@@ -489,7 +539,7 @@ export default function ContentHierarchyFlow() {
                 })
               }
             >
-              Delete
+              Delete Node
             </Button>
             <Button
               icon={<EditOutlined />}
@@ -499,7 +549,7 @@ export default function ContentHierarchyFlow() {
                 setIsRenameModalVisible(true);
               }}
             >
-              Rename
+              Rename Node
             </Button>
           </>
         )}
@@ -519,6 +569,16 @@ export default function ContentHierarchyFlow() {
         >
           Paste Subtree
         </Button>
+        {/* ↓ New “Delete Descendants” button ↓ */}
+        <Button
+          danger
+          icon={<DeleteOutlined />}
+          style={{ marginLeft: 8 }}
+          onClick={handleDeleteDescendants}
+          disabled={!selectedNodeId}
+        >
+          Delete Descendants
+        </Button>
         <div style={{ marginTop: 8 }}>
           {selectedNode ? (
             <>
@@ -532,6 +592,8 @@ export default function ContentHierarchyFlow() {
           )}
         </div>
       </div>
+
+      {/* React Flow canvas */}
       <div ref={reactFlowWrapper} style={{ flex: 1, minHeight: 0 }}>
         <ReactFlowProvider>
           <ReactFlow
@@ -552,6 +614,8 @@ export default function ContentHierarchyFlow() {
           </ReactFlow>
         </ReactFlowProvider>
       </div>
+
+      {/* Add Node Modal */}
       <Modal
         title="Add Node"
         open={isAddModalVisible}
@@ -565,6 +629,8 @@ export default function ContentHierarchyFlow() {
           placeholder="Node name"
         />
       </Modal>
+
+      {/* Rename Node Modal */}
       <Modal
         title="Rename Node"
         open={isRenameModalVisible}
@@ -598,15 +664,29 @@ export default function ContentHierarchyFlow() {
 //   useNodesState,
 //   useEdgesState,
 // } from "reactflow";
+
 // import dagre from "dagre";
 // import "reactflow/dist/style.css";
-// import { Button, Modal, Input, message, Spin, Empty, Select } from "antd";
+// import {
+//   Button,
+//   Modal,
+//   Input,
+//   message,
+//   Spin,
+//   Empty,
+//   Select,
+// } from "antd";
 // import {
 //   DeleteOutlined,
 //   PlusOutlined,
 //   EditOutlined,
 //   ExclamationCircleOutlined,
 // } from "@ant-design/icons";
+// import { SnippetsOutlined } from "@ant-design/icons";
+
+// import { CopyOutlined} from "@ant-design/icons";
+
+
 
 // const { confirm } = Modal;
 // const { Search } = Input;
@@ -686,6 +766,10 @@ export default function ContentHierarchyFlow() {
 //   const [rfInstance, setRfInstance] = useState(null);
 //   const reactFlowWrapper = useRef(null);
 
+//   // “Clipboard” for copied subtree
+//   const [clipboardNodes, setClipboardNodes] = useState([]);
+//   const [copiedRootId, setCopiedRootId] = useState(null);
+
 //   // fetch hierarchy once
 //   const fetchHierarchy = useCallback(() => {
 //     const controller = new AbortController();
@@ -696,8 +780,8 @@ export default function ContentHierarchyFlow() {
 //         const res = await fetch("/api/contentHierarchy", {
 //           signal: controller.signal,
 //           headers: {
-//             Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`
-//           }
+//             Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`,
+//           },
 //         });
 //         if (!res.ok) throw new Error("Fetch failed");
 //         const data = await res.json();
@@ -772,6 +856,28 @@ export default function ContentHierarchyFlow() {
 //     [rawNodes]
 //   );
 
+//   // Helper: collect all descendants of a given rootId (excluding root itself)
+//   const collectDescendants = useCallback(
+//     (rootId) => {
+//       const result = [];
+//       const queue = [...(childrenMap[String(rootId)] || [])];
+
+//       while (queue.length) {
+//         const node = queue.shift();
+//         result.push({
+//           oldId: node.id,
+//           name: node.data.label,
+//           parent: node.parent_id,
+//         });
+//         // enqueue this node’s children
+//         const kids = childrenMap[String(node.id)] || [];
+//         queue.push(...kids);
+//       }
+//       return result;
+//     },
+//     [childrenMap]
+//   );
+
 //   // focus on node (top-center)
 //   const focusNode = useCallback(
 //     (id) => {
@@ -810,8 +916,8 @@ export default function ContentHierarchyFlow() {
 //       const res = await fetch("/api/contentHierarchy", {
 //         method: "POST",
 //         headers: {
-//           "Content-Type": "application/json" ,
-//           Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`
+//           "Content-Type": "application/json",
+//           Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`,
 //         },
 //         body: JSON.stringify({ parent_id: parentId, name: newNodeName }),
 //       });
@@ -834,8 +940,8 @@ export default function ContentHierarchyFlow() {
 //       const res = await fetch("/api/contentHierarchy", {
 //         method: "DELETE",
 //         headers: {
-//           "Content-Type": "application/json" ,
-//           Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`
+//           "Content-Type": "application/json",
+//           Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`,
 //         },
 //         body: JSON.stringify({ id: Number(selectedNodeId) }),
 //       });
@@ -858,8 +964,8 @@ export default function ContentHierarchyFlow() {
 //       const res = await fetch("/api/contentHierarchy", {
 //         method: "PUT",
 //         headers: {
-//           "Content-Type": "application/json" ,
-//           Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`
+//           "Content-Type": "application/json",
+//           Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`,
 //         },
 //         body: JSON.stringify({ id: Number(selectedNodeId), name: renameValue }),
 //       });
@@ -873,6 +979,74 @@ export default function ContentHierarchyFlow() {
 //       setModalLoading(false);
 //     }
 //   }, [renameValue, selectedNodeId, fetchHierarchy]);
+
+//   // Copy handler: store selectedNodeId’s descendants in clipboard
+//   const handleCopy = () => {
+//     if (!selectedNodeId) {
+//       message.error("Select a node first to copy its subtree.");
+//       return;
+//     }
+//     const descendants = collectDescendants(selectedNodeId);
+//     if (!descendants.length) {
+//       message.info("Selected node has no children to copy.");
+//       return;
+//     }
+//     setClipboardNodes(descendants);
+//     setCopiedRootId(selectedNodeId);
+//     message.success(`Copied ${descendants.length} descendant nodes.`);
+//   };
+
+//   // Paste handler: re-create clipboardNodes under selectedNodeId
+//   const handlePaste = useCallback(async () => {
+//     if (!selectedNodeId) {
+//       message.error("Select a node to paste into.");
+//       return;
+//     }
+//     if (!clipboardNodes.length) {
+//       message.error("Nothing copied. Copy a subtree first.");
+//       return;
+//     }
+
+//     const newIdMap = {};
+//     try {
+//       for (const item of clipboardNodes) {
+//         let newParentId;
+//         // If item’s old parent was the copied root, attach under the new target
+//         if (String(item.parent) === String(copiedRootId)) {
+//           newParentId = Number(selectedNodeId);
+//         } else {
+//           // Otherwise, find the newly created ID of its old parent
+//           newParentId = newIdMap[item.parent];
+//         }
+
+//         const res = await fetch("/api/contentHierarchy", {
+//           method: "POST",
+//           headers: {
+//             "Content-Type": "application/json",
+//             Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`,
+//           },
+//           body: JSON.stringify({
+//             parent_id: newParentId,
+//             name: item.name,
+//           }),
+//         });
+//         if (!res.ok) {
+//           const err = await res.json();
+//           throw new Error(err.error || "Failed to insert node");
+//         }
+//         const created = await res.json();
+//         newIdMap[item.oldId] = created.id;
+//       }
+
+//       message.success("Subtree pasted successfully.");
+//       setClipboardNodes([]);
+//       setCopiedRootId(null);
+//       fetchHierarchy();
+//     } catch (err) {
+//       console.error(err);
+//       message.error("Paste failed: " + err.message);
+//     }
+//   }, [clipboardNodes, copiedRootId, selectedNodeId, fetchHierarchy]);
 
 //   // search handler
 //   const onSearchNode = useCallback(
@@ -970,6 +1144,7 @@ export default function ContentHierarchyFlow() {
 //             </Button>
 //             <Button
 //               icon={<EditOutlined />}
+//               style={{ marginRight: 8 }}
 //               onClick={() => {
 //                 setRenameValue(selectedNode.data.label);
 //                 setIsRenameModalVisible(true);
@@ -979,14 +1154,32 @@ export default function ContentHierarchyFlow() {
 //             </Button>
 //           </>
 //         )}
+//         <Button
+//           icon={<CopyOutlined />}
+//           style={{ marginLeft: 8 }}
+//           onClick={handleCopy}
+//           disabled={!selectedNodeId}
+//         >
+//           Copy Subtree
+//         </Button>
+//         <Button
+//           icon={<SnippetsOutlined />}
+//           style={{ marginLeft: 8 }}
+//           onClick={handlePaste}
+//           disabled={!clipboardNodes.length || !selectedNodeId}
+//         >
+//           Paste Subtree
+//         </Button>
 //         <div style={{ marginTop: 8 }}>
 //           {selectedNode ? (
 //             <>
-//               <strong>Selected Node:</strong>{' '}
-//               <span>{selectedNode.data.label} (ID: {selectedNode.id})</span>
+//               <strong>Selected Node:</strong>{" "}
+//               <span>
+//                 {selectedNode.data.label} (ID: {selectedNode.id})
+//               </span>
 //             </>
 //           ) : (
-//             'No selection'
+//             "No selection"
 //           )}
 //         </div>
 //       </div>
