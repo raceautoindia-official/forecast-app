@@ -61,19 +61,19 @@ export default function ForecastPage() {
   // ─── Fetch all needed data once ─────────────────────────────────────
   useEffect(() => {
     fetch("/api/graphs", {
-            headers: {
-              Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`, 
-            },
-          })
+      headers: {
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`,
+      },
+    })
       .then((r) => r.json())
       .then(setGraphs)
       .catch(console.error);
 
     fetch("/api/volumeData", {
-            headers: {
-              Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`, 
-            },
-          })
+      headers: {
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`,
+      },
+    })
       .then((r) => r.json())
       .then((arr) => {
         const m = {};
@@ -101,10 +101,10 @@ export default function ForecastPage() {
 
     // fetch contentHierarchy (nodes include id, name, parent_id)
     fetch("/api/contentHierarchy", {
-            headers: {
-              Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`, 
-            },
-          })
+      headers: {
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`,
+      },
+    })
       .then((r) => r.json())
       .then((arr) => {
         setContentHierarchyNodes(arr);
@@ -118,10 +118,10 @@ export default function ForecastPage() {
       .catch(console.error);
 
     fetch("/api/scoreSettings", {
-            headers: {
-              Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`, 
-            },
-          })
+      headers: {
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`,
+      },
+    })
       .then((r) => r.json())
       .then((data) => setScoreSettings(data))
       .catch(console.error);
@@ -129,20 +129,20 @@ export default function ForecastPage() {
     // pull in the submissions, questions & settings so we can compute averages
     Promise.all([
       fetch("/api/saveScores", {
-            headers: {
-              Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`, 
-            },
-          }),
+        headers: {
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`,
+        },
+      }),
       fetch("/api/questions", {
-            headers: {
-              Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`, 
-            },
-          }),
+        headers: {
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`,
+        },
+      }),
       fetch("/api/scoreSettings", {
-            headers: {
-              Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`, 
-            },
-          }),
+        headers: {
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_SECRET}`,
+        },
+      }),
     ])
       .then(async ([subRes, qRes, sRes]) => {
         if (!subRes.ok || !qRes.ok || !sRes.ok) throw new Error();
@@ -282,8 +282,7 @@ export default function ForecastPage() {
         const ds = volumeDataMap[dsId];
         if (!ds?.stream) return false;
         const parts = ds.stream.split(",").map((n) => parseInt(n, 10));
-        const leafId = parts[parts.length - 1];
-        return selectedCountriesList.includes(leafId);
+        return parts.some((part) => selectedCountriesList.includes(part));
       });
     });
   }, [graphs, volumeDataMap, selectedCountriesList]);
@@ -305,48 +304,41 @@ export default function ForecastPage() {
     return volumeDataMap[firstDsId] || null;
   }, [selectedGraphId, graphs, volumeDataMap]);
 
- // ─── Build chartData from selectedDataset ────────────────
-const chartData = useMemo(() => {
-  if (!selectedDataset?.data) return [];
-  const data = selectedDataset.data;
-  console.log("data ",data);
-
-  // Take the very first key in data (no filtering by selectedCountriesList)
-  const firstKey = Object.keys(data)[0];
-  console.log("firstKey " ,firstKey);
-  if (!firstKey) return [];
-
-  // That firstKey’s value is an object like { "2019": 119018, "2020": 102203, … }
-  const series = data[firstKey];
-  console.log("series " , series);
-
-  // Sort the years and build one row per year
-  const years = Object.keys(series).sort();
-  return years.map(year => ({
-    year,
-    [firstKey]: series[year] ?? 0
-  }));
-}, [selectedDataset]);
-
-
-  // ─── Build pieData (total per country) ────────────────────────────────────
-  const pieData = useMemo(() => {
+  // ─── Build chartData from selectedDataset ────────────────
+  const chartData = useMemo(() => {
     if (!selectedDataset?.data) return [];
     const data = selectedDataset.data;
-    return selectedCountriesList
-      .filter((cn) => data[cn])
-      .map((cn) => ({
-        name: cn,
-        value: Object.values(data[cn] || {}).reduce((sum, v) => sum + v, 0),
-      }));
-  }, [selectedDataset, selectedCountriesList]);
+
+    // Take the very first key in data (no filtering by selectedCountriesList)
+    const firstKey = Object.keys(data)[0];
+    if (!firstKey) return [];
+
+    // That firstKey’s value is an object like { "2019": 119018, "2020": 102203, … }
+    const series = data[firstKey];
+
+    // Sort the years and build one row per year
+    const years = Object.keys(series).sort();
+    return years.map((year) => ({
+      year,
+      [firstKey]: series[year] ?? 0,
+    }));
+  }, [selectedDataset]);
+
+  // ─── Build pieData ────────────────────────────────────
+  const pieData = useMemo(() => {
+    if (!selectedDataset?.data?.data) return [];
+    const yearData = selectedDataset.data.data;
+
+    return Object.entries(yearData).map(([year, value]) => ({
+      name: year,
+      value: value,
+    }));
+  }, [selectedDataset]);
 
   // ─── Aggregate historical volumes (sum across selected countries per year) ─
   const historicalVolumes = useMemo(() => {
-    return chartData.map((row) =>
-      selectedCountriesList.reduce((sum, cn) => sum + (row[cn] || 0), 0)
-    );
-  }, [chartData, selectedCountriesList]);
+    return chartData.map((row) => row.data || 0);
+  }, [chartData]);
 
   // ─── Compute average scores per year from submissions ──────────────────────
   const { yearNames: scoreYearNames, averages: avgScores } =
@@ -368,6 +360,13 @@ const chartData = useMemo(() => {
   // ─── Combine historical + linear forecast ─────────────────────────────────
   const combinedData = useMemo(() => {
     console.log("chartdata ", chartData);
+    // console.log("selectedgraphid " , selectedGraphId);
+    // console.log("forecastdatalr ", forecastDataLR);
+    // console.log("historicalvolumes ", historicalVolumes);
+    // console.log("avgscorevalues ", avgScoreValues);
+    // console.log("selectedCountriesList" , selectedCountriesList);
+    // console.log("selected Dataset ", selectedDataset);
+
     if (!chartData.length) return [];
     const hist = historicalVolumes.map((v, i) => ({
       year: Number(chartData[i].year),
@@ -527,9 +526,12 @@ const chartData = useMemo(() => {
   // console.log("selectedgraphid ", selectedGraphId);
   // console.log("graphs ", graphs);
   // console.log("volumedatamap ", volumeDataMap);
-  console.log("forecastDataLR ", forecastDataLR);
-  console.log("selected Dataset ", selectedDataset);
-  console.log("chartdata ", chartData);
+  // console.log("forecastDataLR ", forecastDataLR);
+  // console.log("selected Dataset ", selectedDataset);
+  // console.log("chartdata ", chartData);
+  // console.log("combineddata" , combinedData);
+  console.log("bothdata ", bothData);
+  console.log("pie data ", pieData);
 
   // ─── Render ─────────────────────────────────────────────────────────────────
   return (
@@ -540,7 +542,7 @@ const chartData = useMemo(() => {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -10 }}
         transition={{ duration: 0.4 }}
-        className="de-view container-fluid"
+        className="container-fluid"
         style={{ background: "#2C2E31" }}
       >
         <div className="container mt-1">
@@ -1001,48 +1003,41 @@ const chartData = useMemo(() => {
                                 content={<CustomTooltip />}
                                 cursor={{ fill: "rgba(255,255,255,0.08)" }}
                               />
-                              <Legend
+                              {/* <Legend
                                 wrapperStyle={{
                                   color: "rgba(255,255,255,0.7)",
                                   marginTop: 16,
                                 }}
                                 iconType="circle"
-                              />
+                              /> */}
 
                               <defs>
-                                {selectedCountriesList.map((cn, i) => (
-                                  <linearGradient
-                                    key={cn}
-                                    id={`grad-${i}`}
-                                    x1="0"
-                                    y1="0"
-                                    x2="0"
-                                    y2="1"
-                                  >
-                                    <stop
-                                      offset="0%"
-                                      stopColor={getColor(i)}
-                                      stopOpacity={0.8}
-                                    />
-                                    <stop
-                                      offset="100%"
-                                      stopColor={getDark(i)}
-                                      stopOpacity={0.3}
-                                    />
-                                  </linearGradient>
-                                ))}
+                                <linearGradient
+                                  id="grad-0"
+                                  x1="0"
+                                  y1="0"
+                                  x2="0"
+                                  y2="1"
+                                >
+                                  <stop
+                                    offset="0%"
+                                    stopColor={getColor(0)}
+                                    stopOpacity={0.8}
+                                  />
+                                  <stop
+                                    offset="100%"
+                                    stopColor={getDark(0)}
+                                    stopOpacity={0.3}
+                                  />
+                                </linearGradient>
                               </defs>
 
-                              {selectedCountriesList.map((cn, i) => (
-                                <Bar
-                                  key={cn}
-                                  dataKey={cn}
-                                  stackId="a"
-                                  fill={`url(#grad-${i})`}
-                                  radius={[6, 6, 0, 0]}
-                                  className="premium-bar"
-                                />
-                              ))}
+                              <Bar
+                                dataKey="data"
+                                fill="url(#grad-0)"
+                                radius={[6, 6, 0, 0]}
+                                className="premium-bar"
+                              />
                             </BarChart>
                           );
                         }

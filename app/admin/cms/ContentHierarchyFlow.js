@@ -173,7 +173,7 @@ export default function ContentHierarchyFlow() {
         });
         if (!res.ok) throw new Error("Fetch failed");
         const data = await res.json();
-
+        // console.log(data.length);
         setRawNodes(
           data.map((n) => ({
             id: String(n.id),

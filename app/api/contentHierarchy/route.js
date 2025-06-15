@@ -5,6 +5,7 @@ export async function GET(req) {
     const [rows] = await pool.query(
       'SELECT * FROM hierarchy_nodes ORDER BY created_at'
     );
+    // console.log(rows.length);
     return new Response(JSON.stringify(rows), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
